@@ -138,7 +138,7 @@ GameObject:
   - component: {fileID: 24694677}
   - component: {fileID: 24694676}
   - component: {fileID: 24694675}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: GroundPlatforms_Tilemap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -583,7 +583,7 @@ GameObject:
   - component: {fileID: 85246482}
   - component: {fileID: 85246481}
   - component: {fileID: 85246480}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ground_Tilemap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -80703,7 +80703,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9cdd5b5782855584e90dc8673440fea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 7
+  _speed: 6
+  _jumpPower: 13
+  _jumpFallGravityMultiplier: 2
+  _groundCheckHeight: 0.05
+  _groundMask:
+    serializedVersion: 2
+    m_Bits: 64
+  _disableGCTime: 0.025
 --- !u!61 &1218292027
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -80744,8 +80751,8 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_AngularDrag: 0
+  m_GravityScale: 5
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
