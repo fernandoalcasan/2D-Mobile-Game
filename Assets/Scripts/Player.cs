@@ -21,9 +21,13 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float _disableGCTime;
 
-    //Help vars
+    //////Help vars////////
+    //Movement
     private float _moveInput;
-    private Vector2 _boxCenter;
+    private int _moveAnimHash;
+
+    //Jump & Ground check
+    private Vector3 _boxCenter;
     private Vector2 _boxSize;
     private bool _jumping;
     private float _initialGravityScale;
@@ -34,6 +38,7 @@ public class Player : MonoBehaviour
     private Rigidbody2D _rbody;
     private PlayerActions _playerActions;
     private BoxCollider2D _collider;
+    private Animator _animator;
 
     void Awake()
     {
@@ -51,6 +56,15 @@ public class Player : MonoBehaviour
 
         _wait = new WaitForSeconds(_disableGCTime);
 
+        //Size of the ground checking box (width, height)
+        _boxSize = new Vector2(_collider.bounds.size.x, _groundCheckHeight);
+
+        _animator = GetComponent<Animator>();
+        if (_animator is null)
+            Debug.Log("Animator is NULL!");
+
+        _moveAnimHash = Animator.StringToHash("Movement");
+
         _playerActions.Player_Map.Jump.performed += Jump_performed;
     }
 
@@ -62,14 +76,20 @@ public class Player : MonoBehaviour
     void FixedUpdate()
     {
         HandleMovement();
-        _rbody.velocity = new Vector2(_moveInput, _rbody.velocity.y);
+        Vector2 movement = _rbody.velocity;
+        movement.x = _moveInput;
+        _rbody.velocity = movement;
 
         HandleGravity();
     }
 
     private void HandleMovement()
     {
+        //Get input value
         _moveInput = _playerActions.Player_Map.Movement.ReadValue<float>() * _speed;
+
+        //Set animation float value
+        _animator.SetFloat(_moveAnimHash, Mathf.Abs(_moveInput));
     }
 
     private void Jump_performed(InputAction.CallbackContext context)
@@ -105,23 +125,11 @@ public class Player : MonoBehaviour
         _groundCheckEnabled = true;
     }
 
-    private void OnDrawGizmos()
-    {
-        if(_jumping)
-            Gizmos.color = Color.red;
-        else
-            Gizmos.color = Color.green;
-        Gizmos.DrawWireCube(_boxCenter, _boxSize);
-    }
-
     private bool IsGrounded()
     {
         //Center coordinate of box that checks if player is touching the ground
-        _boxCenter = new Vector2(_collider.bounds.center.x, _collider.bounds.center.y) +
-                     (Vector2.down * (_collider.bounds.extents.y + (_groundCheckHeight / 2f)));
-
-        //Size of the box (width, height)
-        _boxSize = new Vector2(_collider.bounds.size.x, _groundCheckHeight);
+        _boxCenter = _collider.bounds.center;
+        _boxCenter.y -= _collider.bounds.extents.y + (_groundCheckHeight / 2f);
 
         var groundBox = Physics2D.OverlapBox(_boxCenter, _boxSize, 0f, _groundMask);
 
