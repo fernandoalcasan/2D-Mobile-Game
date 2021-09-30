@@ -35,6 +35,9 @@ public class Player : MonoBehaviour
     private WaitForSeconds _wait;
     private int _jumpAnimHash;
 
+    //Attack
+    private int _attackAnimHash;
+
     //References
     private Rigidbody2D _rbody;
     private PlayerActions _playerActions;
@@ -66,7 +69,8 @@ public class Player : MonoBehaviour
         _wait = new WaitForSeconds(_disableGCTime);
         _moveAnimHash = Animator.StringToHash("Movement");
         _jumpAnimHash = Animator.StringToHash("Jumping");
-        
+        _attackAnimHash = Animator.StringToHash("Attack");
+
         //Size of the ground checking box (width, height)
         _boxSize = new Vector2(_collider.bounds.size.x, _groundCheckHeight);
 
@@ -75,6 +79,7 @@ public class Player : MonoBehaviour
         _playerActions.Player_Map.Movement.performed += OnMovementInput;
         _playerActions.Player_Map.Movement.canceled += OnMovementInput;
         _playerActions.Player_Map.Jump.performed += Jump_performed;
+        _playerActions.Player_Map.Attack.performed += Attack_performed;
     }
 
     private void OnEnable()
@@ -116,6 +121,11 @@ public class Player : MonoBehaviour
             _jumping = true;
             StartCoroutine(EnableGroundCheckAfterJump());
         }
+    }
+    
+    private void Attack_performed(InputAction.CallbackContext context)
+    {
+        _animator.SetTrigger(_attackAnimHash);
     }
 
     private void HandleGravity()

@@ -33,6 +33,14 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""Attack"",
+                    ""type"": ""Button"",
+                    ""id"": ""b0767d64-745e-4261-b1ea-43b318512e5a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -79,6 +87,17 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2fa6dea4-0476-45ac-9508-c1373931fcca"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -89,6 +108,7 @@ public class @PlayerActions : IInputActionCollection, IDisposable
         m_Player_Map = asset.FindActionMap("Player_Map", throwIfNotFound: true);
         m_Player_Map_Movement = m_Player_Map.FindAction("Movement", throwIfNotFound: true);
         m_Player_Map_Jump = m_Player_Map.FindAction("Jump", throwIfNotFound: true);
+        m_Player_Map_Attack = m_Player_Map.FindAction("Attack", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -140,12 +160,14 @@ public class @PlayerActions : IInputActionCollection, IDisposable
     private IPlayer_MapActions m_Player_MapActionsCallbackInterface;
     private readonly InputAction m_Player_Map_Movement;
     private readonly InputAction m_Player_Map_Jump;
+    private readonly InputAction m_Player_Map_Attack;
     public struct Player_MapActions
     {
         private @PlayerActions m_Wrapper;
         public Player_MapActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @Movement => m_Wrapper.m_Player_Map_Movement;
         public InputAction @Jump => m_Wrapper.m_Player_Map_Jump;
+        public InputAction @Attack => m_Wrapper.m_Player_Map_Attack;
         public InputActionMap Get() { return m_Wrapper.m_Player_Map; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -161,6 +183,9 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @Jump.started -= m_Wrapper.m_Player_MapActionsCallbackInterface.OnJump;
                 @Jump.performed -= m_Wrapper.m_Player_MapActionsCallbackInterface.OnJump;
                 @Jump.canceled -= m_Wrapper.m_Player_MapActionsCallbackInterface.OnJump;
+                @Attack.started -= m_Wrapper.m_Player_MapActionsCallbackInterface.OnAttack;
+                @Attack.performed -= m_Wrapper.m_Player_MapActionsCallbackInterface.OnAttack;
+                @Attack.canceled -= m_Wrapper.m_Player_MapActionsCallbackInterface.OnAttack;
             }
             m_Wrapper.m_Player_MapActionsCallbackInterface = instance;
             if (instance != null)
@@ -171,6 +196,9 @@ public class @PlayerActions : IInputActionCollection, IDisposable
                 @Jump.started += instance.OnJump;
                 @Jump.performed += instance.OnJump;
                 @Jump.canceled += instance.OnJump;
+                @Attack.started += instance.OnAttack;
+                @Attack.performed += instance.OnAttack;
+                @Attack.canceled += instance.OnAttack;
             }
         }
     }
@@ -179,5 +207,6 @@ public class @PlayerActions : IInputActionCollection, IDisposable
     {
         void OnMovement(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
+        void OnAttack(InputAction.CallbackContext context);
     }
 }
