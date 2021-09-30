@@ -39,6 +39,7 @@ public class Player : MonoBehaviour
     private PlayerActions _playerActions;
     private BoxCollider2D _collider;
     private Animator _animator;
+    private SpriteRenderer _sprite;
 
     void Awake()
     {
@@ -48,23 +49,29 @@ public class Player : MonoBehaviour
         if (_rbody is null)
             Debug.LogError("Rigidbody2D is NULL!");
 
-        _initialGravityScale = _rbody.gravityScale;
-
         _collider = GetComponent<BoxCollider2D>();
         if (_collider is null)
             Debug.Log("BoxCollider2D is NULL!");
-
-        _wait = new WaitForSeconds(_disableGCTime);
-
-        //Size of the ground checking box (width, height)
-        _boxSize = new Vector2(_collider.bounds.size.x, _groundCheckHeight);
 
         _animator = GetComponent<Animator>();
         if (_animator is null)
             Debug.Log("Animator is NULL!");
 
+        _sprite = GetComponent<SpriteRenderer>();
+        if (_sprite is null)
+            Debug.LogError("SpriteRenderer is NULL!");
+        
+        _initialGravityScale = _rbody.gravityScale;
+        _wait = new WaitForSeconds(_disableGCTime);
         _moveAnimHash = Animator.StringToHash("Movement");
+        
+        //Size of the ground checking box (width, height)
+        _boxSize = new Vector2(_collider.bounds.size.x, _groundCheckHeight);
 
+        //Methods subscribed to actions from input system
+        _playerActions.Player_Map.Movement.started += OnMovementInput;
+        _playerActions.Player_Map.Movement.performed += OnMovementInput;
+        _playerActions.Player_Map.Movement.canceled += OnMovementInput;
         _playerActions.Player_Map.Jump.performed += Jump_performed;
     }
 
@@ -76,17 +83,23 @@ public class Player : MonoBehaviour
     void FixedUpdate()
     {
         HandleMovement();
-        Vector2 movement = _rbody.velocity;
-        movement.x = _moveInput;
-        _rbody.velocity = movement;
-
         HandleGravity();
     }
 
     private void HandleMovement()
     {
+        Vector2 movement = _rbody.velocity;
+        movement.x = _moveInput * _speed;
+        _rbody.velocity = movement;
+    }
+
+    private void OnMovementInput(InputAction.CallbackContext context)
+    {
         //Get input value
-        _moveInput = _playerActions.Player_Map.Movement.ReadValue<float>() * _speed;
+        _moveInput = context.ReadValue<float>();
+
+        //Flip sprite depending on movement (0 stays same, less than 0 is true and great than 0 is false)
+        _sprite.flipX = _moveInput == 0f ? _sprite.flipX : _moveInput < 0f;
 
         //Set animation float value
         _animator.SetFloat(_moveAnimHash, Mathf.Abs(_moveInput));
