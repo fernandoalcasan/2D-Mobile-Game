@@ -33,6 +33,7 @@ public class Player : MonoBehaviour
     private float _initialGravityScale;
     private bool _groundCheckEnabled = true;
     private WaitForSeconds _wait;
+    private int _jumpAnimHash;
 
     //References
     private Rigidbody2D _rbody;
@@ -64,6 +65,7 @@ public class Player : MonoBehaviour
         _initialGravityScale = _rbody.gravityScale;
         _wait = new WaitForSeconds(_disableGCTime);
         _moveAnimHash = Animator.StringToHash("Movement");
+        _jumpAnimHash = Animator.StringToHash("Jumping");
         
         //Size of the ground checking box (width, height)
         _boxSize = new Vector2(_collider.bounds.size.x, _groundCheckHeight);
@@ -110,6 +112,7 @@ public class Player : MonoBehaviour
         if(IsGrounded())
         {
             _rbody.velocity += Vector2.up * _jumpPower;
+            _animator.SetBool(_jumpAnimHash, true);
             _jumping = true;
             StartCoroutine(EnableGroundCheckAfterJump());
         }
@@ -119,6 +122,7 @@ public class Player : MonoBehaviour
     {
         if(_groundCheckEnabled && IsGrounded())
         {
+            _animator.SetBool(_jumpAnimHash, false);
             _jumping = false;
         }
         else if (_jumping && _rbody.velocity.y < 0f) //Jump Fall
