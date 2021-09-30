@@ -44,6 +44,7 @@ public class Player : MonoBehaviour
     private BoxCollider2D _collider;
     private Animator _animator;
     private SpriteRenderer _sprite;
+    private PlayerEffects _effects;
 
     void Awake()
     {
@@ -64,7 +65,11 @@ public class Player : MonoBehaviour
         _sprite = GetComponent<SpriteRenderer>();
         if (_sprite is null)
             Debug.LogError("SpriteRenderer is NULL!");
-        
+
+        _effects = GetComponentInChildren<PlayerEffects>();
+        if (_effects is null)
+            Debug.LogError("PlayerEffects in children is NULL!");
+
         _initialGravityScale = _rbody.gravityScale;
         _wait = new WaitForSeconds(_disableGCTime);
         _moveAnimHash = Animator.StringToHash("Movement");
@@ -126,6 +131,7 @@ public class Player : MonoBehaviour
     private void Attack_performed(InputAction.CallbackContext context)
     {
         _animator.SetTrigger(_attackAnimHash);
+        _effects.DisplayArc(_sprite.flipX);
     }
 
     private void HandleGravity()
