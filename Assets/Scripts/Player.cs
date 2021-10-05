@@ -34,6 +34,9 @@ public class Player : MonoBehaviour
     private bool _groundCheckEnabled = true;
     private WaitForSeconds _wait;
     private int _jumpAnimHash;
+    private int _doubleJumpHash;
+    private bool _canDoubleJump;
+    private bool _keepGrounded;
 
     //Attack
     private int _attackAnimHash;
@@ -75,9 +78,10 @@ public class Player : MonoBehaviour
         _moveAnimHash = Animator.StringToHash("Movement");
         _jumpAnimHash = Animator.StringToHash("Jumping");
         _attackAnimHash = Animator.StringToHash("Attack");
+        _doubleJumpHash = Animator.StringToHash("DoubleJump");
 
         //Size of the ground checking box (width, height)
-        _boxSize = new Vector2(_collider.bounds.size.x, _groundCheckHeight);
+        _boxSize = new Vector2(_collider.bounds.size.x - 0.1f, _groundCheckHeight);
 
         //Methods subscribed to actions from input system
         _playerActions.Player_Map.Movement.started += OnMovementInput;
@@ -121,34 +125,36 @@ public class Player : MonoBehaviour
     {
         if(IsGrounded())
         {
-            _rbody.velocity += Vector2.up * _jumpPower;
+            _rbody.velocity = Vector2.up * _jumpPower;
             _animator.SetBool(_jumpAnimHash, true);
             _jumping = true;
+            _canDoubleJump = true;
             StartCoroutine(EnableGroundCheckAfterJump());
+        }
+        else if(_canDoubleJump)
+        {
+            _canDoubleJump = false;
+            _rbody.velocity = Vector2.up * _jumpPower;
+            _animator.SetTrigger(_doubleJumpHash);
         }
     }
     
     private void Attack_performed(InputAction.CallbackContext context)
     {
-        _animator.SetTrigger(_attackAnimHash);
-        _effects.DisplayArc(_sprite.flipX);
+        if(IsGrounded())
+        {
+            _animator.SetTrigger(_attackAnimHash);
+            _effects.DisplayArc(_sprite.flipX);
+        }
     }
 
     private void HandleGravity()
     {
-        if(_groundCheckEnabled && IsGrounded())
-        {
-            _animator.SetBool(_jumpAnimHash, false);
-            _jumping = false;
-        }
-        else if (_jumping && _rbody.velocity.y < 0f) //Jump Fall
-        {
+        if (_groundCheckEnabled)
+            IsGrounded();
+
+        if (_jumping && _rbody.velocity.y < 0f) //Jump Fall
             _rbody.gravityScale = _initialGravityScale * _jumpFallGravityMultiplier;
-        }
-        else //Normal Fall
-        {
-            _rbody.gravityScale = _initialGravityScale;
-        }
     }
 
     private IEnumerator EnableGroundCheckAfterJump()
@@ -167,7 +173,18 @@ public class Player : MonoBehaviour
         var groundBox = Physics2D.OverlapBox(_boxCenter, _boxSize, 0f, _groundMask);
 
         if(groundBox != null)
+        {
+            if(!_keepGrounded)
+            {
+                _keepGrounded = true;
+                _animator.SetBool(_jumpAnimHash, false);
+                _jumping = false;
+                _canDoubleJump = false;
+                _rbody.gravityScale = _initialGravityScale;
+            }
             return true;
+        }
+        _keepGrounded = false;
         return false;
     }
 
