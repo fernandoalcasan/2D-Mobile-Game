@@ -25,6 +25,7 @@ public class Player : MonoBehaviour
     //Movement
     private float _moveInput;
     private int _moveAnimHash;
+    private Vector3 _facing;
 
     //Jump & Ground check
     private Vector3 _boxCenter;
@@ -46,7 +47,6 @@ public class Player : MonoBehaviour
     private PlayerActions _playerActions;
     private BoxCollider2D _collider;
     private Animator _animator;
-    private SpriteRenderer _sprite;
     private PlayerEffects _effects;
 
     void Awake()
@@ -64,10 +64,6 @@ public class Player : MonoBehaviour
         _animator = GetComponent<Animator>();
         if (_animator is null)
             Debug.Log("Animator is NULL!");
-
-        _sprite = GetComponent<SpriteRenderer>();
-        if (_sprite is null)
-            Debug.LogError("SpriteRenderer is NULL!");
 
         _effects = GetComponentInChildren<PlayerEffects>();
         if (_effects is null)
@@ -114,8 +110,13 @@ public class Player : MonoBehaviour
         //Get input value
         _moveInput = context.ReadValue<float>();
 
-        //Flip sprite depending on movement (0 stays same, less than 0 is true and great than 0 is false)
-        _sprite.flipX = _moveInput == 0f ? _sprite.flipX : _moveInput < 0f;
+        //Flip character by rotation on Y axis depending on movement
+        if(_moveInput != 0f)
+        {
+            _facing = transform.eulerAngles;
+            _facing.y = _moveInput > 0 ? 0f : 180f;
+            transform.eulerAngles = _facing;
+        }
 
         //Set animation float value
         _animator.SetFloat(_moveAnimHash, Mathf.Abs(_moveInput));
@@ -144,7 +145,7 @@ public class Player : MonoBehaviour
         if(IsGrounded())
         {
             _animator.SetTrigger(_attackAnimHash);
-            _effects.DisplayArc(_sprite.flipX);
+            _effects.DisplayArc(_facing.y < 0f);
         }
     }
 
