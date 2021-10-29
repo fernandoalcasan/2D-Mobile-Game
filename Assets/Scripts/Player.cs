@@ -21,6 +21,14 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float _disableGCTime;
 
+    [Header("Attack Properties")]
+    [SerializeField]
+    private Transform _attackPoint;
+    [SerializeField]
+    private float _attackRange;
+    [SerializeField]
+    private LayerMask _attackMask;
+
     //////Help vars////////
     //Movement
     private float _moveInput;
@@ -147,6 +155,29 @@ public class Player : MonoBehaviour
             _animator.SetTrigger(_attackAnimHash);
             _effects.DisplayArc(_facing.y < 0f);
         }
+    }
+
+    //Method called from attack animation
+    private void Attack()
+    {
+        Collider2D[] objs = Physics2D.OverlapCircleAll(_attackPoint.position, _attackRange, _attackMask);
+
+        foreach (var obj in objs)
+        {
+            if(obj.TryGetComponent(out IDamageable hit))
+            {
+                hit.Damage();
+            }
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (_attackPoint is null)
+            return;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(_attackPoint.position, _attackRange);
     }
 
     private void HandleGravity()

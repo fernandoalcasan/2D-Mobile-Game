@@ -2,22 +2,35 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MossGiant : Enemy
+public class MossGiant : Enemy, IDamageable
 {
+    public int Health { get; set; }
+
+    [SerializeField]
+    private float _knockbackForce;
+
     private void Start()
     {
-        Attack();
+        Health = health;
     }
 
-    protected override void Attack()
+    public void Damage()
     {
-        base.Attack();
-        Debug.Log("Moss Giant class: Attack method called!");
-    }
+        _gotHit = true;
+        Health--;
 
-    protected override void Update()
-    {
-        //implement Update functionality here
+        if (transform.position.x > _player.position.x)
+            _rb.AddForce((Vector2.right + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
+        else
+            _rb.AddForce((Vector2.left + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
+        
+        if(Health < 1)
+        {
+            _anim.SetTrigger(_deathAnimHash);
+            _collider.enabled = false;
+            Destroy(gameObject, 2f);
+        }
+        else
+            _anim.SetTrigger(_hitAnimHash);
     }
-
 }

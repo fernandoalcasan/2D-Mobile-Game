@@ -2,21 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Spider : Enemy
+public class Spider : Enemy, IDamageable
 {
+    public int Health { get; set; }
+
     private void Start()
     {
-        Attack();
+        Health = health;
     }
 
-    protected override void Attack()
+    public void Damage()
     {
-        base.Attack();
-        Debug.Log("Spider class: Attack method called!");
-    }
+        Health--;
 
-    protected override void Update()
-    {
-
+        if (Health < 1)
+        {
+            _anim.SetTrigger(_deathAnimHash);
+            //Destroy(gameObject);
+        }
+        else
+            _anim.SetTrigger(_hitAnimHash);
     }
 }

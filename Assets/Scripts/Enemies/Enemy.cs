@@ -2,19 +2,173 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(BoxCollider2D), typeof (Rigidbody2D))]
 public abstract class Enemy : MonoBehaviour
 {
     [SerializeField]
-    protected float health;
+    protected int health;
     [SerializeField]
     protected float speed;
     [SerializeField]
     protected float gems;
 
-    protected virtual void Attack()
+    [SerializeField]
+    private float attackDistance;
+    [SerializeField]
+    protected float attackRange;
+
+    [SerializeField]
+    private List<Transform> _waypoints;
+    protected Animator _anim;
+    protected BoxCollider2D _collider;
+    protected Transform _player;
+    protected Rigidbody2D _rb;
+
+    private Vector3 _currentTarget;
+    private int _targetIndex;
+    private int _idleAnimHash;
+    protected int _walkAnimHash;
+    protected int _hitAnimHash;
+    protected int _attackAnimHash;
+    protected int _deathAnimHash;
+    private bool _onIdle;
+    private Vector3 _facing;
+    private bool _hunting;
+    private bool _attacking;
+    protected bool _gotHit;
+
+
+    private void Awake()
     {
-        Debug.Log("Enemy class: Attack method called!");
+        _anim = GetComponent<Animator>();
+        _collider = GetComponent<BoxCollider2D>();
+        _rb = GetComponent<Rigidbody2D>();
+
+        if (_anim is null)
+            Debug.LogError("The enemy animator is NULL!");
+
+        if (_waypoints.Count < 2)
+            Debug.LogError("Please select two or more waypoints for the enemy");
+
+        _idleAnimHash = Animator.StringToHash("Idle");
+        _hitAnimHash = Animator.StringToHash("GetHit");
+        _attackAnimHash = Animator.StringToHash("Attack");
+        _deathAnimHash = Animator.StringToHash("Death");
+        _walkAnimHash = Animator.StringToHash("Walk");
+
+        _targetIndex = 1;
+        _currentTarget = _waypoints[_targetIndex].position;
+        RotateTowardsTarget(_currentTarget.x);
     }
 
-    protected abstract void Update();
+    private void FixedUpdate()
+    {
+        if (!_hunting)
+            MoveToWaypoint();
+        else
+        {
+            if (_attacking || _gotHit)
+                return;
+
+            //Handle rotation towards the player
+            if ((_facing.y == 0f && _player.position.x < transform.position.x) ||
+                (_facing.y == 180f && _player.position.x > transform.position.x))
+                RotateTowardsTarget(_player.position.x);
+
+            if(Vector2.Distance(_player.position, transform.position) <= attackDistance)
+            {
+                PerformAttack(_player.position);
+                return;
+            }
+            
+            Vector2 newPos = transform.position;
+            newPos.x = _player.position.x;
+            newPos = Vector2.MoveTowards(transform.position, newPos, speed * 2 * Time.fixedDeltaTime);
+            _rb.MovePosition(newPos);
+        }
+    }
+
+    private void MoveToWaypoint()
+    {
+        if (_onIdle)
+            return;
+
+        if(Vector2.Distance(_rb.position, _currentTarget) <= .25f)
+        {
+            //Idle when enemy arrives to a waypoint
+            _onIdle = true;
+            _anim.SetTrigger(_idleAnimHash);
+
+            _targetIndex++;
+            if(_targetIndex >= _waypoints.Count)
+            {
+                _waypoints.Reverse();
+                _targetIndex = 1;
+            }
+
+            _currentTarget = _waypoints[_targetIndex].position;
+        }
+
+        _rb.MovePosition(Vector2.MoveTowards(transform.position, _currentTarget, speed * Time.fixedDeltaTime));
+    }
+    
+    private void RotateTowardsTarget(float targetXPos)
+    {
+        _facing = transform.eulerAngles;
+        if (targetXPos > transform.position.x)
+            _facing.y = 0f;
+        else
+            _facing.y = 180f;
+
+        transform.eulerAngles = _facing;
+    }
+
+    //Method called at the end of the idle animation
+    private void StopIdle()
+    {
+        _onIdle = false;
+        _anim.SetTrigger(_walkAnimHash);
+        RotateTowardsTarget(_currentTarget.x);
+    }
+
+    public void IdentifyPlayer(Transform player)
+    {
+        if (_player is null)
+            _player = player;
+
+        _anim.SetTrigger(_walkAnimHash);
+        _hunting = true;
+        _onIdle = false;
+    }
+
+    public void ReturnToPatrol()
+    {
+        _hunting = false;
+        _onIdle = true;
+        _anim.SetTrigger(_idleAnimHash);
+        _anim.ResetTrigger(_walkAnimHash);
+    }
+
+    //Method called after the attack state ends
+    public void StopAttacking()
+    {
+        _attacking = false;
+    }
+
+    //Method called after the githit state ends
+    public void StopHitFeedback()
+    {
+        _gotHit = false;
+    }
+
+    protected virtual void PerformAttack(Vector2 finalPos)
+    {
+        _anim.SetTrigger(_attackAnimHash);
+        _attacking = true;
+
+        /*Debug.Log("playerPos es: " + finalPos);
+        finalPos = Vector2.MoveTowards(transform.position, finalPos, Vector2.Distance(transform.position, finalPos));
+        Debug.Log("finalpos es: " + finalPos);
+        _rb.MovePosition(finalPos);*/
+    }
 }
