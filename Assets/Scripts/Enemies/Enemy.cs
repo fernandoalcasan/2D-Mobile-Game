@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D), typeof (Rigidbody2D))]
-public abstract class Enemy : MonoBehaviour
+public abstract class Enemy : MonoBehaviour, IDamageable
 {
+    public int Health { get; set; }
     [SerializeField]
     protected int health;
     [SerializeField]
@@ -16,6 +17,8 @@ public abstract class Enemy : MonoBehaviour
     private float attackDistance;
     [SerializeField]
     protected float attackRange;
+    [SerializeField]
+    private float _knockbackForce;
 
     [SerializeField]
     private List<Transform> _waypoints;
@@ -56,6 +59,7 @@ public abstract class Enemy : MonoBehaviour
         _deathAnimHash = Animator.StringToHash("Death");
         _walkAnimHash = Animator.StringToHash("Walk");
 
+        Health = health;
         _targetIndex = 1;
         _currentTarget = _waypoints[_targetIndex].position;
         RotateTowardsTarget(_currentTarget.x);
@@ -66,26 +70,7 @@ public abstract class Enemy : MonoBehaviour
         if (!_hunting)
             MoveToWaypoint();
         else
-        {
-            if (_attacking || _gotHit)
-                return;
-
-            //Handle rotation towards the player
-            if ((_facing.y == 0f && _player.position.x < transform.position.x) ||
-                (_facing.y == 180f && _player.position.x > transform.position.x))
-                RotateTowardsTarget(_player.position.x);
-
-            if(Vector2.Distance(_player.position, transform.position) <= attackDistance)
-            {
-                PerformAttack(_player.position);
-                return;
-            }
-            
-            Vector2 newPos = transform.position;
-            newPos.x = _player.position.x;
-            newPos = Vector2.MoveTowards(transform.position, newPos, speed * 2 * Time.fixedDeltaTime);
-            _rb.MovePosition(newPos);
-        }
+            HuntPlayer();
     }
 
     private void MoveToWaypoint()
@@ -110,6 +95,28 @@ public abstract class Enemy : MonoBehaviour
         }
 
         _rb.MovePosition(Vector2.MoveTowards(transform.position, _currentTarget, speed * Time.fixedDeltaTime));
+    }
+
+    private void HuntPlayer()
+    {
+        if (_attacking || _gotHit)
+            return;
+
+        //Handle rotation towards the player
+        if ((_facing.y == 0f && _player.position.x < transform.position.x) ||
+            (_facing.y == 180f && _player.position.x > transform.position.x))
+            RotateTowardsTarget(_player.position.x);
+
+        if (Vector2.Distance(_player.position, transform.position) <= attackDistance)
+        {
+            PerformAttack(_player.position);
+            return;
+        }
+
+        Vector2 newPos = transform.position;
+        newPos.x = _player.position.x;
+        newPos = Vector2.MoveTowards(transform.position, newPos, speed * 2 * Time.fixedDeltaTime);
+        _rb.MovePosition(newPos);
     }
     
     private void RotateTowardsTarget(float targetXPos)
@@ -165,10 +172,25 @@ public abstract class Enemy : MonoBehaviour
     {
         _anim.SetTrigger(_attackAnimHash);
         _attacking = true;
+    }
 
-        /*Debug.Log("playerPos es: " + finalPos);
-        finalPos = Vector2.MoveTowards(transform.position, finalPos, Vector2.Distance(transform.position, finalPos));
-        Debug.Log("finalpos es: " + finalPos);
-        _rb.MovePosition(finalPos);*/
+    public virtual void Damage()
+    {
+        _gotHit = true;
+        Health--;
+
+        if (transform.position.x > _player.position.x)
+            _rb.AddForce((Vector2.right + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
+        else
+            _rb.AddForce((Vector2.left + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
+
+        if (Health < 1)
+        {
+            _anim.SetTrigger(_deathAnimHash);
+            _collider.enabled = false;
+            Destroy(gameObject, 2f);
+        }
+        else
+            _anim.SetTrigger(_hitAnimHash);
     }
 }

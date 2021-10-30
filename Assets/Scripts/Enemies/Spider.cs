@@ -2,25 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Spider : Enemy, IDamageable
+public class Spider : Enemy
 {
-    public int Health { get; set; }
-
-    private void Start()
+    [SerializeField]
+    private GameObject _acidPrefab;
+    
+    protected override void PerformAttack(Vector2 finalPos)
     {
-        Health = health;
+        base.PerformAttack(finalPos);
     }
 
-    public void Damage()
+    //Method called from attack animation as event trigger
+    private void ThrowAcid()
     {
-        Health--;
-
-        if (Health < 1)
-        {
-            _anim.SetTrigger(_deathAnimHash);
-            //Destroy(gameObject);
-        }
-        else
-            _anim.SetTrigger(_hitAnimHash);
+        Instantiate(_acidPrefab, transform.position, transform.rotation);
     }
 }
