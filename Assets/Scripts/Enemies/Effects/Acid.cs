@@ -11,11 +11,20 @@ public class Acid : MonoBehaviour
 
     private void Start()
     {
-        Destroy(gameObject, _timeToDestroy);       
+        Destroy(gameObject, _timeToDestroy);
     }
 
     private void FixedUpdate()
     {
         transform.Translate(Time.fixedDeltaTime * _speed * Vector2.right);
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.TryGetComponent(out IDamageable hit))
+        {
+            hit.Damage();
+            Destroy(gameObject);
+        }
     }
 }

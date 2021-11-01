@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IDamageable
 {
     [Header("Player Properties")]
     [SerializeField]
@@ -56,6 +56,8 @@ public class Player : MonoBehaviour
     private BoxCollider2D _collider;
     private Animator _animator;
     private PlayerEffects _effects;
+
+    public int Health { get; set; }
 
     void Awake()
     {
@@ -223,5 +225,10 @@ public class Player : MonoBehaviour
     private void OnDisable()
     {
         _playerActions.Player_Map.Disable();
+    }
+
+    public void Damage()
+    {
+        Debug.Log("player damaged");
     }
 }
