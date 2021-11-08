@@ -12,6 +12,13 @@ public class Player : MonoBehaviour, IDamageable
     private float _jumpPower;
     [SerializeField] [Range(1f, 5f)]
     private float _jumpFallGravityMultiplier;
+    [SerializeField]
+    private int _lives;
+    public int Health { get; set; }
+    [SerializeField]
+    private float _knockbackForce;
+    [SerializeField]
+    private int _diamonds;
 
     [Header("Ground Check Properties")]
     [SerializeField]
@@ -34,6 +41,7 @@ public class Player : MonoBehaviour, IDamageable
     private float _moveInput;
     private int _moveAnimHash;
     private Vector3 _facing;
+    private bool _cantMove;
 
     //Jump & Ground check
     private Vector3 _boxCenter;
@@ -49,6 +57,8 @@ public class Player : MonoBehaviour, IDamageable
 
     //Attack
     private int _attackAnimHash;
+    private int _hitAnimHash;
+    private int _deathAnimHash;
 
     //References
     private Rigidbody2D _rbody;
@@ -56,8 +66,6 @@ public class Player : MonoBehaviour, IDamageable
     private BoxCollider2D _collider;
     private Animator _animator;
     private PlayerEffects _effects;
-
-    public int Health { get; set; }
 
     void Awake()
     {
@@ -79,12 +87,15 @@ public class Player : MonoBehaviour, IDamageable
         if (_effects is null)
             Debug.LogError("PlayerEffects in children is NULL!");
 
+        Health = _lives;
         _initialGravityScale = _rbody.gravityScale;
         _wait = new WaitForSeconds(_disableGCTime);
         _moveAnimHash = Animator.StringToHash("Movement");
         _jumpAnimHash = Animator.StringToHash("Jumping");
         _attackAnimHash = Animator.StringToHash("Attack");
         _doubleJumpHash = Animator.StringToHash("DoubleJump");
+        _hitAnimHash = Animator.StringToHash("GetHit");
+        _deathAnimHash = Animator.StringToHash("Death");
 
         //Size of the ground checking box (width, height)
         _boxSize = new Vector2(_collider.bounds.size.x - 0.1f, _groundCheckHeight);
@@ -95,6 +106,7 @@ public class Player : MonoBehaviour, IDamageable
         _playerActions.Player_Map.Movement.canceled += OnMovementInput;
         _playerActions.Player_Map.Jump.performed += Jump_performed;
         _playerActions.Player_Map.Attack.performed += Attack_performed;
+        Diamond.OnDiamondCollected += () => _diamonds++;
     }
 
     private void OnEnable()
@@ -110,6 +122,9 @@ public class Player : MonoBehaviour, IDamageable
 
     private void HandleMovement()
     {
+        if (_cantMove)
+            return;
+
         Vector2 movement = _rbody.velocity;
         movement.x = _moveInput * _speed;
         _rbody.velocity = movement;
@@ -117,6 +132,9 @@ public class Player : MonoBehaviour, IDamageable
 
     private void OnMovementInput(InputAction.CallbackContext context)
     {
+        if (_cantMove && !context.canceled)
+            return;
+
         //Get input value
         _moveInput = context.ReadValue<float>();
 
@@ -162,25 +180,26 @@ public class Player : MonoBehaviour, IDamageable
     //Method called from attack animation
     private void Attack()
     {
+        _rbody.velocity = Vector2.zero;
         Collider2D[] objs = Physics2D.OverlapCircleAll(_attackPoint.position, _attackRange, _attackMask);
 
         foreach (var obj in objs)
         {
             if(obj.TryGetComponent(out IDamageable hit))
             {
-                hit.Damage();
+                hit.Damage(transform.position);
             }
         }
     }
 
-    private void OnDrawGizmos()
+    /*private void OnDrawGizmos()
     {
         if (_attackPoint is null)
             return;
 
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(_attackPoint.position, _attackRange);
-    }
+    }*/
 
     private void HandleGravity()
     {
@@ -227,8 +246,32 @@ public class Player : MonoBehaviour, IDamageable
         _playerActions.Player_Map.Disable();
     }
 
-    public void Damage()
+    public void Damage(Vector2 attackPos)
     {
-        Debug.Log("player damaged");
+        Health--;
+
+        if (transform.position.x > attackPos.x)
+            _rbody.AddForce((Vector2.right + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
+        else
+            _rbody.AddForce((Vector2.left + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
+
+        if (Health < 1)
+        {
+            _animator.SetTrigger(_deathAnimHash);
+            //dead is true
+            //Destroy(gameObject, 2f);
+        }
+        else
+            _animator.SetTrigger(_hitAnimHash);
+    }
+
+    public void EnableMovement()
+    {
+        _cantMove = false;
+    }
+
+    public void DisableMovement()
+    {
+        _cantMove = true;
     }
 }

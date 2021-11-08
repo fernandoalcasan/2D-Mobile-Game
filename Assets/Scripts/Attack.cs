@@ -22,7 +22,7 @@ public class Attack : MonoBehaviour
 
         if(other.TryGetComponent(out IDamageable hit))
         {
-            hit.Damage();
+            hit.Damage(transform.parent.position);
             StartCoroutine(AttackCooldown());
         }
     }

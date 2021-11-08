@@ -23,7 +23,7 @@ public class Acid : MonoBehaviour
     {
         if (other.TryGetComponent(out IDamageable hit))
         {
-            hit.Damage();
+            hit.Damage(transform.position);
             Destroy(gameObject);
         }
     }

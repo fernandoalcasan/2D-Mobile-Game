@@ -12,6 +12,8 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     protected float speed;
     [SerializeField]
     protected float gems;
+    [SerializeField]
+    private GameObject _gemPrefab;
 
     [SerializeField]
     private float attackDistance;
@@ -23,7 +25,6 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     [SerializeField]
     private List<Transform> _waypoints;
     protected Animator _anim;
-    protected BoxCollider2D _collider;
     protected Transform _player;
     protected Rigidbody2D _rb;
 
@@ -39,12 +40,11 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     private bool _hunting;
     private bool _attacking;
     protected bool _gotHit;
-
+    private bool _isDead;
 
     private void Awake()
     {
         _anim = GetComponent<Animator>();
-        _collider = GetComponent<BoxCollider2D>();
         _rb = GetComponent<Rigidbody2D>();
 
         if (_anim is null)
@@ -174,20 +174,27 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         _attacking = true;
     }
 
-    public virtual void Damage()
+    public virtual void Damage(Vector2 attackPos)
     {
+        if (_isDead)
+            return;
+
         _gotHit = true;
         Health--;
 
-        if (transform.position.x > _player.position.x)
+        if (transform.position.x > attackPos.x)
             _rb.AddForce((Vector2.right + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
         else
             _rb.AddForce((Vector2.left + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
 
         if (Health < 1)
         {
+            _isDead = true;
+            for (int i = 0; i < gems; i++)
+            {
+                Instantiate(_gemPrefab, transform.position, Quaternion.identity);
+            }
             _anim.SetTrigger(_deathAnimHash);
-            _collider.enabled = false;
             Destroy(gameObject, 2f);
         }
         else
