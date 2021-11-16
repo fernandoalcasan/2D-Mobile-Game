@@ -64,6 +64,7 @@ public class Shop : MonoBehaviour
     {
         _shopCanvas.enabled = enable;
         _shopCanvasScaler.enabled = enable;
+        _textDialog.text = "Greetings strange traveler... Hoy may I be of service?";
     }
 
     public void OnItemSelected(Item item)
@@ -80,14 +81,24 @@ public class Shop : MonoBehaviour
 
     public void BuyItem()
     {
-        Debug.Log(_player);
+        if(_itemSelected is null || _btnSelected is null)
+        {
+            _textDialog.text = "If you want to buy an item ask me about it. Don't be afraid.";
+            return;
+        }
+
         if (_player.SpendDiamonds(_itemSelected.cost))
         {
             _itemSelected.OnItemBought.Raise();
+            _btnSelected.interactable = false;
+            _textDialog.text = _itemSelected.buyPhrase;
+
+            _itemSelected = null;
+            _btnSelected = null;
         }
         else
         {
-            _textDialog.text = "It seems that you don't have enough diamonds to buy this item...";
+            _textDialog.text = "It seems that you don't have enough diamonds to buy this item... Sorry, I don't do discounts.";
         }
     }
 }

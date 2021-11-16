@@ -11,6 +11,8 @@ public class Item : ScriptableObject
 
     [TextArea(3,5)]
     public string description;
+    [TextArea(3, 5)]
+    public string buyPhrase;
 
     public GameEvent OnItemBought;
 }
