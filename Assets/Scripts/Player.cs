@@ -14,11 +14,19 @@ public class Player : MonoBehaviour, IDamageable
     private float _jumpFallGravityMultiplier;
     [SerializeField]
     private int _lives;
-    public int Health { get; set; }
+    public float Health { get; set; }
     [SerializeField]
     private float _knockbackForce;
     [SerializeField]
+    private float _attackPower;
+
+    ////// INVENTORY ////////
+    
+    [SerializeField]
     private int _diamonds;
+    public int Diamonds { get => _diamonds; }
+    private bool _gotCastleKey;
+    public bool GotCastleKey { get => _gotCastleKey; }
 
     [Header("Ground Check Properties")]
     [SerializeField]
@@ -187,7 +195,7 @@ public class Player : MonoBehaviour, IDamageable
         {
             if(obj.TryGetComponent(out IDamageable hit))
             {
-                hit.Damage(transform.position);
+                hit.Damage(transform.position, _attackPower);
             }
         }
     }
@@ -246,16 +254,16 @@ public class Player : MonoBehaviour, IDamageable
         _playerActions.Player_Map.Disable();
     }
 
-    public void Damage(Vector2 attackPos)
+    public void Damage(Vector2 attackPos, float damage)
     {
-        Health--;
+        Health -= damage;
 
         if (transform.position.x > attackPos.x)
             _rbody.AddForce((Vector2.right + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
         else
             _rbody.AddForce((Vector2.left + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
 
-        if (Health < 1)
+        if (Health <= 0f)
         {
             _animator.SetTrigger(_deathAnimHash);
             //dead is true
@@ -273,5 +281,31 @@ public class Player : MonoBehaviour, IDamageable
     public void DisableMovement()
     {
         _cantMove = true;
+    }
+
+    public bool SpendDiamonds(int value)
+    {
+        if(value <= _diamonds)
+        {
+            _diamonds -= value;
+            return true;
+        }
+
+        return false;
+    }
+
+    public void UpgradeAttackPower(float percentage)
+    {
+        _attackPower *= (100f + percentage) / 100;
+    }
+
+    public void UpgradeSpeed(float percentage)
+    {
+        _speed *= (100f + percentage) / 100;
+    }
+
+    public void GetCastleKey()
+    {
+        _gotCastleKey = true;
     }
 }

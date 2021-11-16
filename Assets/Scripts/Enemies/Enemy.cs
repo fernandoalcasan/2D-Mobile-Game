@@ -5,9 +5,9 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider2D), typeof (Rigidbody2D))]
 public abstract class Enemy : MonoBehaviour, IDamageable
 {
-    public int Health { get; set; }
+    public float Health { get; set; }
     [SerializeField]
-    protected int health;
+    protected float health;
     [SerializeField]
     protected float speed;
     [SerializeField]
@@ -174,20 +174,20 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         _attacking = true;
     }
 
-    public virtual void Damage(Vector2 attackPos)
+    public virtual void Damage(Vector2 attackPos, float damage)
     {
         if (_isDead)
             return;
 
         _gotHit = true;
-        Health--;
+        Health -= damage;
 
         if (transform.position.x > attackPos.x)
             _rb.AddForce((Vector2.right + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
         else
             _rb.AddForce((Vector2.left + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
 
-        if (Health < 1)
+        if (Health <= 0f)
         {
             _isDead = true;
             for (int i = 0; i < gems; i++)

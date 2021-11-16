@@ -4,6 +4,6 @@ using UnityEngine;
 
 public interface IDamageable
 {
-    int Health { get; set; }
-    void Damage(Vector2 attackPos);
+    float Health { get; set; }
+    void Damage(Vector2 attackPos, float damage);
 }

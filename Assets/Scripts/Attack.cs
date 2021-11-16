@@ -7,6 +7,9 @@ public class Attack : MonoBehaviour
 {
     [SerializeField]
     private float _resetAttackTime;
+    [SerializeField]
+    private float _attackPower;
+
     private WaitForSeconds _wait;
     private bool _canDamage = true;
 
@@ -22,7 +25,7 @@ public class Attack : MonoBehaviour
 
         if(other.TryGetComponent(out IDamageable hit))
         {
-            hit.Damage(transform.parent.position);
+            hit.Damage(transform.parent.position, _attackPower);
             StartCoroutine(AttackCooldown());
         }
     }

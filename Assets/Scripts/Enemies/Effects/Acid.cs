@@ -8,6 +8,8 @@ public class Acid : MonoBehaviour
     private float _timeToDestroy;
     [SerializeField]
     private float _speed;
+    [SerializeField]
+    private float _attackPower;
 
     private void Start()
     {
@@ -23,7 +25,7 @@ public class Acid : MonoBehaviour
     {
         if (other.TryGetComponent(out IDamageable hit))
         {
-            hit.Damage(transform.position);
+            hit.Damage(transform.position, _attackPower);
             Destroy(gameObject);
         }
     }
