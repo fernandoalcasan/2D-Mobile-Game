@@ -5,28 +5,11 @@ using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour, IDamageable
 {
+    public float Health { get; set; }
+
     [Header("Player Properties")]
     [SerializeField]
-    private float _speed;
-    [SerializeField]
-    private float _jumpPower;
-    [SerializeField] [Range(1f, 5f)]
-    private float _jumpFallGravityMultiplier;
-    [SerializeField]
-    private int _lives;
-    public float Health { get; set; }
-    [SerializeField]
-    private float _knockbackForce;
-    [SerializeField]
-    private float _attackPower;
-
-    ////// INVENTORY ////////
-    
-    [SerializeField]
-    private int _diamonds;
-    public int Diamonds { get => _diamonds; }
-    private bool _gotCastleKey;
-    public bool GotCastleKey { get => _gotCastleKey; }
+    private PlayerData _playerData;
 
     [Header("Ground Check Properties")]
     [SerializeField]
@@ -95,7 +78,7 @@ public class Player : MonoBehaviour, IDamageable
         if (_effects is null)
             Debug.LogError("PlayerEffects in children is NULL!");
 
-        Health = _lives;
+        Health = _playerData.health;
         _initialGravityScale = _rbody.gravityScale;
         _wait = new WaitForSeconds(_disableGCTime);
         _moveAnimHash = Animator.StringToHash("Movement");
@@ -114,7 +97,7 @@ public class Player : MonoBehaviour, IDamageable
         _playerActions.Player_Map.Movement.canceled += OnMovementInput;
         _playerActions.Player_Map.Jump.performed += Jump_performed;
         _playerActions.Player_Map.Attack.performed += Attack_performed;
-        Diamond.OnDiamondCollected += () => _diamonds++;
+        Diamond.OnDiamondCollected += () => _playerData.diamonds++;
     }
 
     private void OnEnable()
@@ -134,7 +117,7 @@ public class Player : MonoBehaviour, IDamageable
             return;
 
         Vector2 movement = _rbody.velocity;
-        movement.x = _moveInput * _speed;
+        movement.x = _moveInput * _playerData.speed;
         _rbody.velocity = movement;
     }
 
@@ -162,7 +145,7 @@ public class Player : MonoBehaviour, IDamageable
     {
         if(IsGrounded())
         {
-            _rbody.velocity = Vector2.up * _jumpPower;
+            _rbody.velocity = Vector2.up * _playerData.jumpPower;
             _animator.SetBool(_jumpAnimHash, true);
             _jumping = true;
             _canDoubleJump = true;
@@ -171,7 +154,7 @@ public class Player : MonoBehaviour, IDamageable
         else if(_canDoubleJump)
         {
             _canDoubleJump = false;
-            _rbody.velocity = Vector2.up * _jumpPower;
+            _rbody.velocity = Vector2.up * _playerData.jumpPower;
             _animator.SetTrigger(_doubleJumpHash);
         }
     }
@@ -195,7 +178,7 @@ public class Player : MonoBehaviour, IDamageable
         {
             if(obj.TryGetComponent(out IDamageable hit))
             {
-                hit.Damage(transform.position, _attackPower);
+                hit.Damage(transform.position, _playerData.attackPower);
             }
         }
     }
@@ -215,7 +198,7 @@ public class Player : MonoBehaviour, IDamageable
             IsGrounded();
 
         if (_jumping && _rbody.velocity.y < 0f) //Jump Fall
-            _rbody.gravityScale = _initialGravityScale * _jumpFallGravityMultiplier;
+            _rbody.gravityScale = _initialGravityScale * _playerData.jumpFallGravityMultiplier;
     }
 
     private IEnumerator EnableGroundCheckAfterJump()
@@ -259,9 +242,9 @@ public class Player : MonoBehaviour, IDamageable
         Health -= damage;
 
         if (transform.position.x > attackPos.x)
-            _rbody.AddForce((Vector2.right + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
+            _rbody.AddForce((Vector2.right + Vector2.up) * _playerData.knockbackForce, ForceMode2D.Impulse);
         else
-            _rbody.AddForce((Vector2.left + Vector2.up) * _knockbackForce, ForceMode2D.Impulse);
+            _rbody.AddForce((Vector2.left + Vector2.up) * _playerData.knockbackForce, ForceMode2D.Impulse);
 
         if (Health <= 0f)
         {
@@ -285,9 +268,9 @@ public class Player : MonoBehaviour, IDamageable
 
     public bool SpendDiamonds(int value)
     {
-        if(value <= _diamonds)
+        if(value <= _playerData.diamonds)
         {
-            _diamonds -= value;
+            _playerData.diamonds -= value;
             return true;
         }
 
@@ -296,16 +279,16 @@ public class Player : MonoBehaviour, IDamageable
 
     public void UpgradeAttackPower(float percentage)
     {
-        _attackPower *= (100f + percentage) / 100;
+        _playerData.attackPower *= (100f + percentage) / 100;
     }
 
     public void UpgradeSpeed(float percentage)
     {
-        _speed *= (100f + percentage) / 100;
+        _playerData.speed *= (100f + percentage) / 100;
     }
 
     public void GetCastleKey()
     {
-        _gotCastleKey = true;
+        _playerData.gotCastleKey = true;
     }
 }

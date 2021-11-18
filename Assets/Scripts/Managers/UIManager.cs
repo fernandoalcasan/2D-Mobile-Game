@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    private Text _diamondsText;
+
     private static UIManager _instance;
     public static UIManager Instance
     {
@@ -21,6 +24,19 @@ public class UIManager : MonoBehaviour
         _instance = this;
     }
 
+    private void OnEnable()
+    {
+        Diamond.OnDiamondCollected += UpdateDiamonds;
+    }
 
+    private void OnDisable()
+    {   
+        Diamond.OnDiamondCollected -= UpdateDiamonds;
+    }
+
+    private void UpdateDiamonds()
+    {
+        _diamondsText.text = "";
+    }
 
 }
