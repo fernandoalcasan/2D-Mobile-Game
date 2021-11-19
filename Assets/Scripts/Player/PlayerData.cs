@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlayerData : ScriptableObject
 {
     [Header("Player Properties")]
+    public float maxHealth;
     public float health;
     public float speed;
     public float jumpPower;

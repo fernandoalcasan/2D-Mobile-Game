@@ -92,13 +92,13 @@ public class Shop : MonoBehaviour
             _itemSelected.OnItemBought.Raise();
             _btnSelected.interactable = false;
             _textDialog.text = _itemSelected.buyPhrase;
-
-            _itemSelected = null;
-            _btnSelected = null;
         }
         else
         {
             _textDialog.text = "It seems that you don't have enough diamonds to buy this item... Sorry, I don't do discounts.";
         }
+
+        _itemSelected = null;
+        _btnSelected = null;
     }
 }

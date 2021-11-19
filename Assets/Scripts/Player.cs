@@ -7,6 +7,9 @@ public class Player : MonoBehaviour, IDamageable
 {
     public float Health { get; set; }
 
+    [SerializeField]
+    private GameEvent _onPlayerDamaged;
+
     [Header("Player Properties")]
     [SerializeField]
     private PlayerData _playerData;
@@ -78,7 +81,7 @@ public class Player : MonoBehaviour, IDamageable
         if (_effects is null)
             Debug.LogError("PlayerEffects in children is NULL!");
 
-        Health = _playerData.health;
+        Health = _playerData.maxHealth;
         _initialGravityScale = _rbody.gravityScale;
         _wait = new WaitForSeconds(_disableGCTime);
         _moveAnimHash = Animator.StringToHash("Movement");
@@ -239,7 +242,12 @@ public class Player : MonoBehaviour, IDamageable
 
     public void Damage(Vector2 attackPos, float damage)
     {
+        if (Health <= 0f)
+            return;
+
         Health -= damage;
+        _playerData.health = Health < 0f ? 0f : Health;
+        _onPlayerDamaged.Raise();
 
         if (transform.position.x > attackPos.x)
             _rbody.AddForce((Vector2.right + Vector2.up) * _playerData.knockbackForce, ForceMode2D.Impulse);
