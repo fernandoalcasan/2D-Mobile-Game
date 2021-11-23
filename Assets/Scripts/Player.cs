@@ -299,4 +299,17 @@ public class Player : MonoBehaviour, IDamageable
     {
         _playerData.gotCastleKey = true;
     }
+
+    private void SavePlayer()
+    {
+        SaveManager.SavePlayerData(_playerData);
+    }
+
+    private void LoadPlayer()
+    {
+        PlayerData load = SaveManager.LoadPlayerData();
+        if (!(load is null))
+            _playerData = load;
+    }
+
 }

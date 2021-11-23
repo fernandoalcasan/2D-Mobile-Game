@@ -14,6 +14,8 @@ public class Diamond : MonoBehaviour
     private float _force;
     [SerializeField]
     private float _timeToBeEnabled;
+    [SerializeField]
+    private float _timeToBeLooted;
 
     private Rigidbody2D _rb;
     private bool _canBeLooted;
@@ -28,6 +30,8 @@ public class Diamond : MonoBehaviour
 
             _rb = GetComponent<Rigidbody2D>();
             _rb.AddForce(new Vector2(UnityEngine.Random.Range(-1f, 1f), 1) * _force, ForceMode2D.Impulse);
+
+            Destroy(gameObject, _timeToBeLooted);
         }
         else
             _canBeLooted = true;
