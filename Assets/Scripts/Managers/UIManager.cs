@@ -42,9 +42,9 @@ public class UIManager : MonoBehaviour
         Diamond.OnDiamondCollected -= UpdateDiamonds;
     }
 
-    private void UpdateDiamonds()
+    public void UpdateDiamonds()
     {
-        _diamondsText.text = "" + _playerData.diamonds;
+        _diamondsText.text = _playerData.diamonds.ToString();
     }
 
     public void UpdateHealth()

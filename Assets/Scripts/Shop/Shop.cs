@@ -15,6 +15,8 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
     private Text _textDialog;
     [SerializeField]
     private Image _itemImg;
+    [SerializeField]
+    private Text _gemsCount;
 
     [Header("Ads properties")]
     [SerializeField]
@@ -27,8 +29,11 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
     private string _rewardedVideoID = "Rewarded_Android";
     [SerializeField]
     private Button _rewardBtn;
+    [SerializeField]
+    private int _diamondsPerAd;
 
-    private Player _player;
+    [SerializeField]
+    private PlayerData _playerData;
     private Item _itemSelected;
     private Button _btnSelected;
 
@@ -55,11 +60,6 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
     {
         if(other.CompareTag("Player"))
         {
-            if(_player is null)
-            {
-                if (other.TryGetComponent(out Player player))
-                    _player = player;
-            }
             _shopWorldCanvas.enabled = true;
             _shopWorldCanvasScaler.enabled = true;
         }
@@ -76,6 +76,7 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
 
     public void DisplayOrHideShop(bool enable)
     {
+        UpdateGems();
         _shopCanvas.enabled = enable;
         _shopCanvasScaler.enabled = enable;
         _textDialog.text = "Greetings strange traveler... Hoy may I be of service?";
@@ -101,11 +102,13 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
             return;
         }
 
-        if (_player.SpendDiamonds(_itemSelected.cost))
+        if (_playerData.diamonds >= _itemSelected.cost)
         {
+            _playerData.diamonds -= _itemSelected.cost;
             _itemSelected.OnItemBought.Raise();
             _btnSelected.interactable = false;
             _textDialog.text = _itemSelected.buyPhrase;
+            UpdateGems();
         }
         else
         {
@@ -116,6 +119,11 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
         _btnSelected = null;
     }
 
+    private void UpdateGems()
+    {
+        _gemsCount.text = _playerData.diamonds.ToString();
+        UIManager.Instance.UpdateDiamonds();
+    }
 
     private void InitializeAdsSDK()
     {
@@ -187,7 +195,8 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
         {
             Debug.Log("Ad was finished, reward was given");
 
-            // Grant a reward.
+            _playerData.diamonds += _diamondsPerAd;
+            UpdateGems();
 
             LoadAd();
         }

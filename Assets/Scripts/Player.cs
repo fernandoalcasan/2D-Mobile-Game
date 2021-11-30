@@ -274,17 +274,6 @@ public class Player : MonoBehaviour, IDamageable
         _cantMove = true;
     }
 
-    public bool SpendDiamonds(int value)
-    {
-        if(value <= _playerData.diamonds)
-        {
-            _playerData.diamonds -= value;
-            return true;
-        }
-
-        return false;
-    }
-
     public void UpgradeAttackPower(float percentage)
     {
         _playerData.attackPower *= (100f + percentage) / 100;
