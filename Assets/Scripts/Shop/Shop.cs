@@ -1,10 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Advertisements;
 
 [RequireComponent(typeof(Collider2D))]
-public class Shop : MonoBehaviour
+public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoadListener, IUnityAdsShowListener
 {
     [SerializeField]
     private Canvas _shopCanvas;
@@ -17,12 +16,27 @@ public class Shop : MonoBehaviour
     [SerializeField]
     private Image _itemImg;
 
+    [Header("Ads properties")]
+    [SerializeField]
+    private string _androidGameID;
+    [SerializeField]
+    private bool _testMode = true;
+    [SerializeField]
+    private bool _enablePerPlacementMode = true;
+    [SerializeField]
+    private string _rewardedVideoID = "Rewarded_Android";
+    [SerializeField]
+    private Button _rewardBtn;
+
     private Player _player;
     private Item _itemSelected;
     private Button _btnSelected;
 
-    private void Start()
+    private void Awake()
     {
+
+        InitializeAdsSDK();
+
         if (_shopCanvas is null || _shopWorldCanvas is null)
             Debug.LogError("Please assign the shop Canvas and/or the world canvas");
 
@@ -100,5 +114,82 @@ public class Shop : MonoBehaviour
 
         _itemSelected = null;
         _btnSelected = null;
+    }
+
+
+    private void InitializeAdsSDK()
+    {
+        Advertisement.Initialize(_androidGameID, _testMode, _enablePerPlacementMode, this);
+    }
+
+    public void OnInitializationComplete()
+    {
+        Debug.Log("Unity ads initialized");
+        LoadAd();
+    }
+
+    public void OnInitializationFailed(UnityAdsInitializationError error, string message)
+    {
+        Debug.Log("Unity ads failed to initialize. " + error + ": " + message);
+    }
+
+    private void LoadAd()
+    {
+        Debug.Log("Loading Ad: " + _rewardedVideoID);
+        Advertisement.Load(_rewardedVideoID, this);
+    }
+
+
+
+
+
+
+    public void OnUnityAdsAdLoaded(string placementId)
+    {
+        Debug.Log("Unity Ad loaded correctly");
+        
+        if(placementId.Equals(_rewardedVideoID))
+        {
+            _rewardBtn.interactable = true;
+        }
+    }
+
+    public void OnUnityAdsFailedToLoad(string placementId, UnityAdsLoadError error, string message)
+    {
+        Debug.Log("Unity Ad failed to load.  " + error + ": " + message);
+    }
+
+
+
+
+
+    public void ShowAd()
+    {
+        _rewardBtn.interactable = false;
+        Advertisement.Show(_rewardedVideoID, this);
+    }
+
+
+
+    public void OnUnityAdsShowFailure(string placementId, UnityAdsShowError error, string message)
+    {
+        Debug.Log("Ad wasn't shown, reward wasn't given. " + error + ": " + message);
+        LoadAd();
+    }
+
+    public void OnUnityAdsShowStart(string placementId){}
+
+    public void OnUnityAdsShowClick(string placementId){}
+
+    public void OnUnityAdsShowComplete(string placementId, UnityAdsShowCompletionState showCompletionState)
+    {
+        if (placementId.Equals(_rewardedVideoID) && showCompletionState.Equals(UnityAdsShowCompletionState.COMPLETED))
+        {
+            Debug.Log("Ad was finished, reward was given");
+
+            // Grant a reward.
+
+            LoadAd();
+        }
     }
 }
