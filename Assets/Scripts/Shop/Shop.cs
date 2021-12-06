@@ -34,6 +34,10 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
 
     [SerializeField]
     private PlayerData _playerData;
+    [SerializeField]
+    private GameEvent _OnShopDisplayed;
+    [SerializeField]
+    private GameEvent _OnShopHidden;
     private Item _itemSelected;
     private Button _btnSelected;
 
@@ -76,6 +80,11 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
 
     public void DisplayOrHideShop(bool enable)
     {
+        if (enable)
+            _OnShopDisplayed.Raise();
+        else
+            _OnShopHidden.Raise();
+
         UpdateGems();
         _shopCanvas.enabled = enable;
         _shopCanvasScaler.enabled = enable;

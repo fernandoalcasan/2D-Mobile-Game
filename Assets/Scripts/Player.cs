@@ -301,4 +301,11 @@ public class Player : MonoBehaviour, IDamageable
             _playerData = load;
     }
 
+    public void HandleControls(bool enable)
+    {
+        if(enable)
+            _playerActions.Player_Map.Enable();
+        else
+            _playerActions.Player_Map.Disable();
+    }
 }
