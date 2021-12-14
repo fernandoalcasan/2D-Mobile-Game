@@ -219,7 +219,7 @@ public class Player : MonoBehaviour, IDamageable
 
         var groundBox = Physics2D.OverlapBox(_boxCenter, _boxSize, 0f, _groundMask);
 
-        if(groundBox != null)
+        if(groundBox != null && _rbody.velocity.y < 1f)
         {
             if(!_keepGrounded)
             {

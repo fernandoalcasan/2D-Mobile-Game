@@ -15,6 +15,7 @@ public class Spider : Enemy
     //Method called from attack animation as event trigger
     private void ThrowAcid()
     {
-        Instantiate(_acidPrefab, transform.position, transform.rotation);
+        if(Random.value > 0.33f)
+            Instantiate(_acidPrefab, transform.position, transform.rotation);
     }
 }

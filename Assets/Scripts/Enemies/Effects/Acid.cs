@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Acid : MonoBehaviour
+public class Acid : MonoBehaviour, IDamageable
 {
     [SerializeField]
     private float _timeToDestroy;
@@ -10,6 +10,8 @@ public class Acid : MonoBehaviour
     private float _speed;
     [SerializeField]
     private float _attackPower;
+
+    public float Health { get; set; }
 
     private void Start()
     {
@@ -28,5 +30,12 @@ public class Acid : MonoBehaviour
             hit.Damage(transform.position, _attackPower);
             Destroy(gameObject);
         }
+    }
+
+    public void Damage(Vector2 attackPos, float damage)
+    {
+        //Play acid destruction audio
+
+        Destroy(gameObject);
     }
 }
