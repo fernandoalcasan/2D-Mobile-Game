@@ -120,7 +120,7 @@ public class Player : MonoBehaviour, IDamageable
             return;
 
         Vector2 movement = _rbody.velocity;
-        movement.x = _moveInput * _playerData.speed;
+        movement.x = _moveInput * _playerData.Speed;
         _rbody.velocity = movement;
     }
 
@@ -181,7 +181,7 @@ public class Player : MonoBehaviour, IDamageable
         {
             if(obj.TryGetComponent(out IDamageable hit))
             {
-                hit.Damage(transform.position, _playerData.attackPower);
+                hit.Damage(transform.position, _playerData.AttackPower);
             }
         }
     }
@@ -274,14 +274,15 @@ public class Player : MonoBehaviour, IDamageable
         _cantMove = true;
     }
 
-    public void UpgradeAttackPower(float percentage)
+    public void UpgradeAttackPower()
     {
-        _playerData.attackPower *= (100f + percentage) / 100;
+        _playerData.gotAttackUpgrade = true;
+        _animator.runtimeAnimatorController = _playerData.fireOverride;
     }
 
-    public void UpgradeSpeed(float percentage)
+    public void UpgradeSpeed()
     {
-        _playerData.speed *= (100f + percentage) / 100;
+        _playerData.gotWindBoots = true;
     }
 
     public void GetCastleKey()
