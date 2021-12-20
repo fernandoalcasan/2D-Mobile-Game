@@ -21,6 +21,10 @@ public class Player : MonoBehaviour, IDamageable
     private LayerMask _groundMask;
     [SerializeField]
     private float _disableGCTime;
+    [SerializeField]
+    private PhysicsMaterial2D _slippery;
+    [SerializeField]
+    private PhysicsMaterial2D _nonSlippery;
 
     [Header("Attack Properties")]
     [SerializeField]
@@ -128,6 +132,11 @@ public class Player : MonoBehaviour, IDamageable
     {
         if (_cantMove && !context.canceled)
             return;
+
+        if (context.canceled)
+            _rbody.sharedMaterial = _nonSlippery;
+        else
+            _rbody.sharedMaterial = _slippery;
 
         //Get input value
         _moveInput = context.ReadValue<float>();
