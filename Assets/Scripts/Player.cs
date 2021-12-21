@@ -16,7 +16,11 @@ public class Player : MonoBehaviour, IDamageable
 
     [Header("Ground Check Properties")]
     [SerializeField]
+    private Transform _groundCheckPoint;
+    [SerializeField]
     private float _groundCheckHeight;
+    [SerializeField]
+    private float _slopeCheckHeight;
     [SerializeField]
     private LayerMask _groundMask;
     [SerializeField]
@@ -36,14 +40,19 @@ public class Player : MonoBehaviour, IDamageable
 
     //////Help vars////////
     //Movement
+    private Vector2 _movement;
     private float _moveInput;
     private int _moveAnimHash;
     private Vector3 _facing;
     private bool _cantMove;
 
     //Jump & Ground check
-    private Vector3 _boxCenter;
+    private bool _isGrounded;
+    private Vector3 _feetPos;
     private Vector2 _boxSize;
+    private Vector2 _slopePerp;
+    private float _slopeAngle;
+    private bool _isOnSlope;
     private bool _jumping;
     private float _initialGravityScale;
     private bool _groundCheckEnabled = true;
@@ -51,7 +60,6 @@ public class Player : MonoBehaviour, IDamageable
     private int _jumpAnimHash;
     private int _doubleJumpHash;
     private bool _canDoubleJump;
-    private bool _keepGrounded;
 
     //Attack
     private int _attackAnimHash;
@@ -61,7 +69,7 @@ public class Player : MonoBehaviour, IDamageable
     //References
     private Rigidbody2D _rbody;
     private PlayerActions _playerActions;
-    private BoxCollider2D _collider;
+    private Collider2D _collider;
     private Animator _animator;
     private PlayerEffects _effects;
 
@@ -73,7 +81,7 @@ public class Player : MonoBehaviour, IDamageable
         if (_rbody is null)
             Debug.LogError("Rigidbody2D is NULL!");
 
-        _collider = GetComponent<BoxCollider2D>();
+        _collider = GetComponent<Collider2D>();
         if (_collider is null)
             Debug.Log("BoxCollider2D is NULL!");
 
@@ -114,6 +122,9 @@ public class Player : MonoBehaviour, IDamageable
 
     void FixedUpdate()
     {
+        if (_groundCheckEnabled)
+            GroundCheck();
+        SlopeCheck();
         HandleMovement();
         HandleGravity();
     }
@@ -123,9 +134,21 @@ public class Player : MonoBehaviour, IDamageable
         if (_cantMove)
             return;
 
-        Vector2 movement = _rbody.velocity;
-        movement.x = _moveInput * _playerData.Speed;
-        _rbody.velocity = movement;
+        if(_isGrounded && !_isOnSlope)
+        {
+            _movement.Set(_moveInput * _playerData.Speed, 0f);
+            _rbody.velocity = _movement;
+        }
+        else if(_isGrounded && _isOnSlope)
+        {
+            _movement.Set(-_moveInput * _playerData.Speed * _slopePerp.x, -_moveInput * _playerData.Speed * _slopePerp.y);
+            _rbody.velocity = _movement;
+        }
+        else if(!_isGrounded)
+        {
+            _movement.Set(_moveInput * _playerData.Speed, _rbody.velocity.y);
+            _rbody.velocity = _movement;
+        }
     }
 
     private void OnMovementInput(InputAction.CallbackContext context)
@@ -133,7 +156,7 @@ public class Player : MonoBehaviour, IDamageable
         if (_cantMove && !context.canceled)
             return;
 
-        if (context.canceled)
+        if (context.canceled && _isOnSlope)
             _rbody.sharedMaterial = _nonSlippery;
         else
             _rbody.sharedMaterial = _slippery;
@@ -155,7 +178,7 @@ public class Player : MonoBehaviour, IDamageable
 
     private void Jump_performed(InputAction.CallbackContext context)
     {
-        if(IsGrounded())
+        if(_isGrounded)
         {
             _rbody.velocity = Vector2.up * _playerData.jumpPower;
             _animator.SetBool(_jumpAnimHash, true);
@@ -173,7 +196,7 @@ public class Player : MonoBehaviour, IDamageable
     
     private void Attack_performed(InputAction.CallbackContext context)
     {
-        if(IsGrounded())
+        if(_isGrounded)
         {
             _animator.SetTrigger(_attackAnimHash);
             _effects.DisplayArc(_facing.y < 0f);
@@ -202,13 +225,16 @@ public class Player : MonoBehaviour, IDamageable
 
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(_attackPoint.position, _attackRange);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(_groundCheckPoint.position, _boxSize);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(_groundCheckPoint.position, _groundCheckHeight);
     }*/
 
     private void HandleGravity()
     {
-        if (_groundCheckEnabled)
-            IsGrounded();
-
         if (_jumping && _rbody.velocity.y < 0f) //Jump Fall
             _rbody.gravityScale = _initialGravityScale * _playerData.jumpFallGravityMultiplier;
     }
@@ -216,32 +242,55 @@ public class Player : MonoBehaviour, IDamageable
     private IEnumerator EnableGroundCheckAfterJump()
     {
         _groundCheckEnabled = false;
+        _isGrounded = false;
         yield return _wait;
         _groundCheckEnabled = true;
     }
 
-    private bool IsGrounded()
+    private void SlopeCheck()
     {
-        //Center coordinate of box that checks if player is touching the ground
-        _boxCenter = _collider.bounds.center;
-        _boxCenter.y -= _collider.bounds.extents.y + (_groundCheckHeight / 2f);
+        //Slope check from feet origin
+        _feetPos = _collider.bounds.center;
+        _feetPos.y -= _collider.bounds.extents.y;
+        var groundCastHit = Physics2D.Raycast(_feetPos, Vector2.down, _slopeCheckHeight, _groundMask);
 
-        var groundBox = Physics2D.OverlapBox(_boxCenter, _boxSize, 0f, _groundMask);
-
-        if(groundBox != null && _rbody.velocity.y < 1f)
+        if (groundCastHit)
         {
-            if(!_keepGrounded)
-            {
-                _keepGrounded = true;
-                _animator.SetBool(_jumpAnimHash, false);
-                _jumping = false;
-                _canDoubleJump = false;
-                _rbody.gravityScale = _initialGravityScale;
-            }
-            return true;
+            _slopePerp = Vector2.Perpendicular(groundCastHit.normal).normalized;
+            _slopeAngle = Vector2.Angle(groundCastHit.normal, Vector2.up);
+
+            if (_slopeAngle != 0f)
+                _isOnSlope = true;
+            else
+                _isOnSlope = false;
+
+            Debug.DrawRay(groundCastHit.point, _slopePerp, Color.blue);
+            Debug.DrawRay(groundCastHit.point, groundCastHit.normal, Color.red);
         }
-        _keepGrounded = false;
-        return false;
+    }
+
+    private void GroundCheck()
+    {
+        var groundCast = Physics2D.OverlapBox(_groundCheckPoint.position, _boxSize, 0f, _groundMask);
+
+        if(!groundCast)
+        {
+            _isGrounded = false;
+        }
+        //When player is landing from a jump
+        else if (_jumping && _rbody.velocity.y < 1f && groundCast)
+        {
+            _isGrounded = true;
+            _animator.SetBool(_jumpAnimHash, false);
+            _jumping = false;
+            _canDoubleJump = false;
+            _rbody.gravityScale = _initialGravityScale;
+        }
+        //When player is not jumping and is on the ground
+        else if (!_jumping && groundCast)
+            _isGrounded = true;
+
+        //If player is jumping and going up _isGrounded remains without change
     }
 
     private void OnDisable()
