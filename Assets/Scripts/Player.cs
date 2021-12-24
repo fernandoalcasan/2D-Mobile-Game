@@ -263,9 +263,6 @@ public class Player : MonoBehaviour, IDamageable
                 _isOnSlope = true;
             else
                 _isOnSlope = false;
-
-            Debug.DrawRay(groundCastHit.point, _slopePerp, Color.blue);
-            Debug.DrawRay(groundCastHit.point, groundCastHit.normal, Color.red);
         }
     }
 
