@@ -37,6 +37,8 @@ public class Player : MonoBehaviour, IDamageable
     private float _attackRange;
     [SerializeField]
     private LayerMask _attackMask;
+    [SerializeField]
+    private float _attackCoolDown;
 
     //////Help vars////////
     //Movement
@@ -65,6 +67,8 @@ public class Player : MonoBehaviour, IDamageable
     private int _attackAnimHash;
     private int _hitAnimHash;
     private int _deathAnimHash;
+    private bool _canAttack = true;
+    private WaitForSeconds _attackWait;
 
     //References
     private Rigidbody2D _rbody;
@@ -96,6 +100,7 @@ public class Player : MonoBehaviour, IDamageable
         Health = _playerData.maxHealth;
         _initialGravityScale = _rbody.gravityScale;
         _wait = new WaitForSeconds(_disableGCTime);
+        _attackWait = new WaitForSeconds(_attackCoolDown);
         _moveAnimHash = Animator.StringToHash("Movement");
         _jumpAnimHash = Animator.StringToHash("Jumping");
         _attackAnimHash = Animator.StringToHash("Attack");
@@ -196,11 +201,19 @@ public class Player : MonoBehaviour, IDamageable
     
     private void Attack_performed(InputAction.CallbackContext context)
     {
-        if(_isGrounded)
+        if(_canAttack && _isGrounded && Health > 0f)
         {
+            StartCoroutine(StartAttackCoolDown());
             _animator.SetTrigger(_attackAnimHash);
             _effects.DisplayArc(_facing.y < 0f);
         }
+    }
+
+    private IEnumerator StartAttackCoolDown()
+    {
+        _canAttack = false;
+        yield return _attackWait;
+        _canAttack = true;
     }
 
     //Method called from attack animation
