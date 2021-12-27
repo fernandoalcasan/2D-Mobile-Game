@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
@@ -12,6 +13,10 @@ public class UIManager : MonoBehaviour
     private Text _diamondsText;
     [SerializeField]
     private Image _healthImage;
+
+    [SerializeField]
+    private Canvas _pauseCanvas;
+    private CanvasScaler _pauseCanvasScaler;
 
     private static UIManager _instance;
     public static UIManager Instance
@@ -35,6 +40,11 @@ public class UIManager : MonoBehaviour
         UpdateHealth();
         UpdateDiamonds();
         Diamond.OnDiamondCollected += UpdateDiamonds;
+
+        if (!(_pauseCanvas is null))
+            _pauseCanvasScaler = _pauseCanvas.GetComponent<CanvasScaler>();
+        else
+            Debug.Log("Please reference the pause canvas");
     }
 
     private void OnDisable()
@@ -51,5 +61,31 @@ public class UIManager : MonoBehaviour
     {
         float currentHealth = _playerData.health / _playerData.maxHealth;
         _healthImage.fillAmount = currentHealth;
+    }
+
+    public void PauseGame()
+    {
+        Time.timeScale = 0f;
+        _pauseCanvas.enabled = true;
+        _pauseCanvasScaler.enabled = true;
+    }
+
+    public void ResumeGame()
+    {
+        Time.timeScale = 1f;
+        _pauseCanvas.enabled = false;
+        _pauseCanvasScaler.enabled = false;
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(1);
+    }
+
+    public void GoToMainMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(0);
     }
 }
