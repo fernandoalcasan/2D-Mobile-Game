@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(BoxCollider2D), typeof (Rigidbody2D))]
+[RequireComponent(typeof(BoxCollider2D), typeof (Rigidbody2D), typeof(AudioSource))]
 public abstract class Enemy : MonoBehaviour, IDamageable
 {
     public float Health { get; set; }
@@ -27,6 +27,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     protected Animator _anim;
     protected Transform _player;
     protected Rigidbody2D _rb;
+    protected AudioSource _sfx;
 
     private Vector3 _currentTarget;
     private int _targetIndex;
@@ -46,6 +47,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     {
         _anim = GetComponent<Animator>();
         _rb = GetComponent<Rigidbody2D>();
+        _sfx = GetComponent<AudioSource>();
 
         if (_anim is null)
             Debug.LogError("The enemy animator is NULL!");
@@ -199,5 +201,10 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         }
         else
             _anim.SetTrigger(_hitAnimHash);
+    }
+
+    protected void PlaySFX(AudioClip clip)
+    {
+        _sfx.PlayOneShot(clip);
     }
 }
