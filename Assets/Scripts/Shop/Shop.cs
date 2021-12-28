@@ -41,6 +41,16 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
     private Item _itemSelected;
     private Button _btnSelected;
 
+    [Header("Shop Audio")]
+    [SerializeField]
+    private AudioClip _buySound;
+    [SerializeField]
+    private AudioClip _failSound;
+    [SerializeField]
+    private AudioClip _gemsSound;
+    [SerializeField]
+    private AudioClip _successSound;
+
     private void Awake()
     {
 
@@ -108,6 +118,7 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
         if(_itemSelected is null || _btnSelected is null)
         {
             _textDialog.text = "If you want to buy an item ask me about it. Don't be afraid.";
+            AudioManager.Instance.PlayOneShotSFX(_failSound, 1f);
             return;
         }
 
@@ -118,9 +129,11 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
             _btnSelected.interactable = false;
             _textDialog.text = _itemSelected.buyPhrase;
             UpdateGems();
+            AudioManager.Instance.PlayOneShotSFX(_buySound, 1f);
         }
         else
         {
+            AudioManager.Instance.PlayOneShotSFX(_failSound, 1f);
             _textDialog.text = "It seems that you don't have enough diamonds to buy this item... Sorry, I don't do discounts.";
         }
 
@@ -203,6 +216,8 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
         if (placementId.Equals(_rewardedVideoID) && showCompletionState.Equals(UnityAdsShowCompletionState.COMPLETED))
         {
             Debug.Log("Ad was finished, reward was given");
+            AudioManager.Instance.PlayOneShotSFX(_successSound, 1f);
+            AudioManager.Instance.PlayOneShotSFX(_gemsSound, 1f);
 
             _playerData.diamonds += _diamondsPerAd;
             UpdateGems();

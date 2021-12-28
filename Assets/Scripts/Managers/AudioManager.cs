@@ -6,6 +6,8 @@ public class AudioManager : MonoBehaviour
 {
     [SerializeField]
     private AudioSource _sfx;
+    [SerializeField]
+    private AudioSource _ui;
 
     private static AudioManager _instance;
     public static AudioManager Instance
@@ -23,10 +25,18 @@ public class AudioManager : MonoBehaviour
     {
         _instance = this;
     }
+    private void Start()
+    {
+        _ui.ignoreListenerPause = true;
+    }
 
     public void PlayOneShotSFX(AudioClip audio, float volume)
     {
         _sfx.PlayOneShot(audio, volume);
     }
 
+    public void PlayOneShotUI(AudioClip audio, float volume)
+    {
+        _ui.PlayOneShot(audio, volume);
+    }
 }

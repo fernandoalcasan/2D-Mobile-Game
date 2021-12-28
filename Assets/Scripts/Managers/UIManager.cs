@@ -65,6 +65,7 @@ public class UIManager : MonoBehaviour
 
     public void PauseGame()
     {
+        AudioListener.pause = true;
         Time.timeScale = 0f;
         _pauseCanvas.enabled = true;
         _pauseCanvasScaler.enabled = true;
@@ -72,6 +73,7 @@ public class UIManager : MonoBehaviour
 
     public void ResumeGame()
     {
+        AudioListener.pause = false;
         Time.timeScale = 1f;
         _pauseCanvas.enabled = false;
         _pauseCanvasScaler.enabled = false;
