@@ -203,8 +203,8 @@ public abstract class Enemy : MonoBehaviour, IDamageable
             _anim.SetTrigger(_hitAnimHash);
     }
 
-    protected void PlaySFX(AudioClip clip)
+    protected void PlaySFX(SFX sfx)
     {
-        _sfx.PlayOneShot(clip);
+        _sfx.PlayOneShot(sfx.sound, sfx.volume);
     }
 }

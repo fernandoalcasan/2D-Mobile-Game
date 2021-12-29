@@ -18,6 +18,9 @@ public class UIManager : MonoBehaviour
     private Canvas _pauseCanvas;
     private CanvasScaler _pauseCanvasScaler;
 
+    [SerializeField]
+    private float _waitToLoadScene;
+
     private static UIManager _instance;
     public static UIManager Instance
     {
@@ -80,14 +83,20 @@ public class UIManager : MonoBehaviour
     }
 
     public void RestartGame()
-    {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(1);
+    { 
+        StartCoroutine(LoadAsync(1));
     }
 
     public void GoToMainMenu()
     {
+        StartCoroutine(LoadAsync(0));
+    }
+
+    private IEnumerator LoadAsync(int scene)
+    {
+        yield return new WaitForSecondsRealtime(_waitToLoadScene);
+        AudioListener.pause = false;
         Time.timeScale = 1f;
-        SceneManager.LoadScene(0);
+        SceneManager.LoadScene(scene);
     }
 }

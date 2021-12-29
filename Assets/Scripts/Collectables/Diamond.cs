@@ -17,7 +17,7 @@ public class Diamond : MonoBehaviour
     [SerializeField]
     private float _timeToBeLooted;
     [SerializeField]
-    private AudioClip _collectSound;
+    private SFX _collectSFX;
 
     private Rigidbody2D _rb;
     private bool _canBeLooted;
@@ -54,7 +54,7 @@ public class Diamond : MonoBehaviour
         {
             if (!(OnDiamondCollected is null))
                 OnDiamondCollected();
-            AudioManager.Instance.PlayOneShotSFX(_collectSound, 1f);
+            AudioManager.Instance.PlayOneShotSFX(_collectSFX.sound, _collectSFX.volume);
             Destroy(gameObject);
         }
     }

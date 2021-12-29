@@ -30,7 +30,7 @@ public class Player : MonoBehaviour, IDamageable
     [SerializeField]
     private PhysicsMaterial2D _nonSlippery;
     [SerializeField]
-    private AudioClip _landingSound;
+    private SFX _landingSFX;
 
     [Header("Attack Properties")]
     [SerializeField]
@@ -297,7 +297,7 @@ public class Player : MonoBehaviour, IDamageable
             _jumping = false;
             _canDoubleJump = false;
             _rbody.gravityScale = _initialGravityScale;
-            AudioManager.Instance.PlayOneShotSFX(_landingSound, 1f);
+            AudioManager.Instance.PlayOneShotSFX(_landingSFX.sound, _landingSFX.volume);
         }
         //When player is not jumping and is on the ground
         else if (!_jumping && groundCast)
@@ -381,14 +381,14 @@ public class Player : MonoBehaviour, IDamageable
             _playerActions.Player_Map.Disable();
     }
 
-    private void PlaySFX(AudioClip clip)
+    private void PlaySFX(SFX sfx)
     {
-        AudioManager.Instance.PlayOneShotSFX(clip, 1f);
+        AudioManager.Instance.PlayOneShotSFX(sfx.sound, sfx.volume);
     }
 
-    private void PlayFootstep(AudioClip footSound)
+    private void PlayFootstep(SFX footstep)
     {
         if(_isGrounded)
-            AudioManager.Instance.PlayOneShotSFX(footSound, 0.75f);
+            AudioManager.Instance.PlayOneShotSFX(footstep.sound, footstep.volume);
     }
 }
