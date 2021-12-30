@@ -119,7 +119,7 @@ public class Player : MonoBehaviour, IDamageable
         _playerActions.Player_Map.Movement.canceled += OnMovementInput;
         _playerActions.Player_Map.Jump.performed += Jump_performed;
         _playerActions.Player_Map.Attack.performed += Attack_performed;
-        Diamond.OnDiamondCollected += () => _playerData.diamonds++;
+        Diamond.OnDiamondCollected += CollectGem;
     }
 
     private void OnEnable()
@@ -290,14 +290,17 @@ public class Player : MonoBehaviour, IDamageable
             _isGrounded = false;
         }
         //When player is landing from a jump
-        else if (_jumping && _rbody.velocity.y < 1f && groundCast)
+        else if (_jumping && groundCast)
         {
-            _isGrounded = true;
-            _animator.SetBool(_jumpAnimHash, false);
-            _jumping = false;
-            _canDoubleJump = false;
-            _rbody.gravityScale = _initialGravityScale;
-            AudioManager.Instance.PlayOneShotSFX(_landingSFX.sound, _landingSFX.volume);
+            if(_rbody.velocity.y < 1f || _isOnSlope)
+            {
+                _isGrounded = true;
+                _animator.SetBool(_jumpAnimHash, false);
+                _jumping = false;
+                _canDoubleJump = false;
+                _rbody.gravityScale = _initialGravityScale;
+                AudioManager.Instance.PlayOneShotSFX(_landingSFX.sound, _landingSFX.volume);
+            }
         }
         //When player is not jumping and is on the ground
         else if (!_jumping && groundCast)
@@ -306,9 +309,15 @@ public class Player : MonoBehaviour, IDamageable
         //If player is jumping and going up _isGrounded remains without change
     }
 
+    private void CollectGem()
+    {
+        _playerData.diamonds++;
+    }
+
     private void OnDisable()
     {
         _playerActions.Player_Map.Disable();
+        Diamond.OnDiamondCollected -= CollectGem;
     }
 
     public void Damage(Vector2 attackPos, float damage)
