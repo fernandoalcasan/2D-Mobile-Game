@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(BoxCollider2D), typeof (Rigidbody2D), typeof(AudioSource))]
+[RequireComponent(typeof(Collider2D), typeof (Rigidbody2D), typeof(AudioSource))]
 public abstract class Enemy : MonoBehaviour, IDamageable
 {
     public float Health { get; set; }
@@ -21,6 +21,8 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     protected float attackRange;
     [SerializeField]
     private float _knockbackForce;
+    [SerializeField]
+    private float _huntingSpeed;
 
     [SerializeField]
     private List<Transform> _waypoints;
@@ -115,10 +117,9 @@ public abstract class Enemy : MonoBehaviour, IDamageable
             return;
         }
 
-        Vector2 newPos = transform.position;
-        newPos.x = _player.position.x;
-        newPos = Vector2.MoveTowards(transform.position, newPos, speed * 2 * Time.fixedDeltaTime);
-        _rb.MovePosition(newPos);
+        Vector2 newVel2Move = _rb.velocity;
+        newVel2Move.x = transform.right.normalized.x * _huntingSpeed;
+        _rb.velocity = newVel2Move;
     }
     
     private void RotateTowardsTarget(float targetXPos)
