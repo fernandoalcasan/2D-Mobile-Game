@@ -10,6 +10,11 @@ public class CameraStateShift : MonoBehaviour
     
     [SerializeField]
     private string _nextCameraState;
+
+    [SerializeField]
+    private bool _isDependant;
+
+    [Header("Objectives if Dependant")]
     [SerializeField]
     private string _finalCameraState;
     [SerializeField]
@@ -27,9 +32,13 @@ public class CameraStateShift : MonoBehaviour
     private void Start()
     {
         _NCSHash = Animator.StringToHash(_nextCameraState);
-        _FCSHash = Animator.StringToHash(_finalCameraState);
-        _collider = GetComponent<BoxCollider2D>();
-        _waitToCheck = new WaitForSeconds(_checkForObjsEvery);
+
+        if(_isDependant)
+        {
+            _FCSHash = Animator.StringToHash(_finalCameraState);
+            _collider = GetComponent<BoxCollider2D>();
+            _waitToCheck = new WaitForSeconds(_checkForObjsEvery);
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -38,9 +47,16 @@ public class CameraStateShift : MonoBehaviour
         {
             if (!(OnCameraShift is null))
                 OnCameraShift(_NCSHash);
-            _collider.enabled = false;
-            _bounds.SetActive(true);
-            StartCoroutine(CheckObjectives());
+            
+            if(_isDependant)
+            {
+                _collider.enabled = false;
+
+                if(_bounds)
+                    _bounds.SetActive(true);
+                
+                StartCoroutine(CheckObjectives());
+            }
         }
     }
 
@@ -64,7 +80,10 @@ public class CameraStateShift : MonoBehaviour
     {
         if (!(OnCameraShift is null))
             OnCameraShift(_FCSHash);
-        _bounds.SetActive(false);
+
+        if (_bounds)
+            _bounds.SetActive(false);
+
         Destroy(gameObject);
     }
 
