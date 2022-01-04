@@ -14,6 +14,8 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     protected float gems;
     [SerializeField]
     private GameObject _gemPrefab;
+    [SerializeField]
+    private GameObject _disappearPrefab;
 
     [SerializeField]
     private float attackDistance;
@@ -29,6 +31,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     protected Animator _anim;
     protected Transform _player;
     protected Rigidbody2D _rb;
+    protected Collider2D _collider;
     protected AudioSource _sfx;
 
     private Vector3 _currentTarget;
@@ -49,6 +52,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     {
         _anim = GetComponent<Animator>();
         _rb = GetComponent<Rigidbody2D>();
+        _collider = GetComponent<Collider2D>();
         _sfx = GetComponent<AudioSource>();
 
         if (_anim is null)
@@ -198,10 +202,20 @@ public abstract class Enemy : MonoBehaviour, IDamageable
                 Instantiate(_gemPrefab, transform.position, Quaternion.identity);
             }
             _anim.SetTrigger(_deathAnimHash);
+            StartCoroutine(DisplayDeathEffect());
             Destroy(gameObject, 2f);
         }
         else
             _anim.SetTrigger(_hitAnimHash);
+    }
+
+    private IEnumerator DisplayDeathEffect()
+    {
+        yield return new WaitForSeconds(0.5f);
+        Vector2 pos = _collider.bounds.center;
+        pos.y -= _collider.bounds.extents.y / 2;
+        GameObject deathEffect = Instantiate(_disappearPrefab, pos, Quaternion.identity);
+        Destroy(deathEffect, 2f);
     }
 
     protected void PlaySFX(SFX sfx)

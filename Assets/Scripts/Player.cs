@@ -337,6 +337,7 @@ public class Player : MonoBehaviour, IDamageable
         if (Health <= 0f)
         {
             _animator.SetTrigger(_deathAnimHash);
+            _effects.DisplaySpawnEffect();
             //dead is true
             //Destroy(gameObject, 2f);
         }
