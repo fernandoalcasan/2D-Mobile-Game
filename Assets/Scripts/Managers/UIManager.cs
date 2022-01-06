@@ -99,4 +99,9 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
         SceneManager.LoadScene(scene);
     }
+
+    public void RateGame()
+    {
+        Application.OpenURL("market://details?id=" + Application.identifier);
+    }
 }
