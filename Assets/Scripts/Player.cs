@@ -8,7 +8,9 @@ public class Player : MonoBehaviour, IDamageable
     public float Health { get; set; }
 
     [SerializeField]
-    private GameEvent _onPlayerDamaged;
+    private GameEvent OnPlayerDamaged;
+    [SerializeField]
+    private GameEvent OnPlayerDeath;
 
     [Header("Player Properties")]
     [SerializeField]
@@ -78,6 +80,7 @@ public class Player : MonoBehaviour, IDamageable
     private Collider2D _collider;
     private Animator _animator;
     private PlayerEffects _effects;
+    
 
     void Awake()
     {
@@ -327,7 +330,7 @@ public class Player : MonoBehaviour, IDamageable
 
         Health -= damage;
         _playerData.health = Health < 0f ? 0f : Health;
-        _onPlayerDamaged.Raise();
+        OnPlayerDamaged.Raise();
 
         if (transform.position.x > attackPos.x)
             _rbody.AddForce((Vector2.right + Vector2.up) * _playerData.knockbackForce, ForceMode2D.Impulse);
@@ -338,6 +341,9 @@ public class Player : MonoBehaviour, IDamageable
         {
             _animator.SetTrigger(_deathAnimHash);
             _effects.DisplaySpawnEffect();
+
+            OnPlayerDeath.Raise();
+
             //dead is true
             //Destroy(gameObject, 2f);
         }
