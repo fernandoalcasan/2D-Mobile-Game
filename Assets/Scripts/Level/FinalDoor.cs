@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class FinalDoor : MonoBehaviour
 {
     [SerializeField]
-    private float _waitToDisplayGameOVer;
+    private float _waitToDisplayGameOver;
 
     [SerializeField]
     private PlayerData _playerData;
@@ -65,7 +65,7 @@ public class FinalDoor : MonoBehaviour
 
     public void TryToOpenDoor()
     {
-        if(_playerData.gotCastleKey)
+        if(_playerData.data.gotCastleKey)
         {
             _anim.SetTrigger("Open");
 
@@ -84,7 +84,7 @@ public class FinalDoor : MonoBehaviour
 
     private IEnumerator DisplayGameOver()
     {
-        yield return new WaitForSeconds(_waitToDisplayGameOVer);
+        yield return new WaitForSeconds(_waitToDisplayGameOver);
         _gameOverCanvas.enabled = true;
         _goCanvasScaler.enabled = true;
     }

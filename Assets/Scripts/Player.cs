@@ -15,6 +15,8 @@ public class Player : MonoBehaviour, IDamageable
     [Header("Player Properties")]
     [SerializeField]
     private PlayerData _playerData;
+    [SerializeField]
+    private AnimatorOverrideController _fireOverride;
 
     [Header("Ground Check Properties")]
     [SerializeField]
@@ -50,7 +52,6 @@ public class Player : MonoBehaviour, IDamageable
     private float _moveInput;
     private int _moveAnimHash;
     private Vector3 _facing;
-    private bool _cantMove;
 
     //Jump & Ground check
     private bool _isGrounded;
@@ -81,9 +82,10 @@ public class Player : MonoBehaviour, IDamageable
     private Animator _animator;
     private PlayerEffects _effects;
     
-
     void Awake()
     {
+        LoadPlayer();
+
         _playerActions = new PlayerActions();
 
         _rbody = GetComponent<Rigidbody2D>();
@@ -102,7 +104,7 @@ public class Player : MonoBehaviour, IDamageable
         if (_effects is null)
             Debug.LogError("PlayerEffects in children is NULL!");
 
-        Health = _playerData.maxHealth;
+        Health = _playerData.data.maxHealth;
         _initialGravityScale = _rbody.gravityScale;
         _wait = new WaitForSeconds(_disableGCTime);
         _attackWait = new WaitForSeconds(_attackCoolDown);
@@ -141,31 +143,28 @@ public class Player : MonoBehaviour, IDamageable
 
     private void HandleMovement()
     {
-        if (_cantMove)
+        if (!_playerActions.Player_Map.enabled)
             return;
 
         if(_isGrounded && !_isOnSlope)
         {
-            _movement.Set(_moveInput * _playerData.Speed, 0f);
+            _movement.Set(_moveInput * _playerData.data.Speed, 0f);
             _rbody.velocity = _movement;
         }
         else if(_isGrounded && _isOnSlope)
         {
-            _movement.Set(-_moveInput * _playerData.Speed * _slopePerp.x, -_moveInput * _playerData.Speed * _slopePerp.y);
+            _movement.Set(-_moveInput * _playerData.data.Speed * _slopePerp.x, -_moveInput * _playerData.data.Speed * _slopePerp.y);
             _rbody.velocity = _movement;
         }
         else if(!_isGrounded)
         {
-            _movement.Set(_moveInput * _playerData.Speed, _rbody.velocity.y);
+            _movement.Set(_moveInput * _playerData.data.Speed, _rbody.velocity.y);
             _rbody.velocity = _movement;
         }
     }
 
     private void OnMovementInput(InputAction.CallbackContext context)
     {
-        if (_cantMove && !context.canceled)
-            return;
-
         if (context.canceled && _isOnSlope)
             _rbody.sharedMaterial = _nonSlippery;
         else
@@ -188,9 +187,9 @@ public class Player : MonoBehaviour, IDamageable
 
     private void Jump_performed(InputAction.CallbackContext context)
     {
-        if(_isGrounded)
+        if (_isGrounded)
         {
-            _rbody.velocity = Vector2.up * _playerData.jumpPower;
+            _rbody.velocity = Vector2.up * _playerData.data.jumpPower;
             _animator.SetBool(_jumpAnimHash, true);
             _jumping = true;
             _canDoubleJump = true;
@@ -199,7 +198,7 @@ public class Player : MonoBehaviour, IDamageable
         else if(_canDoubleJump)
         {
             _canDoubleJump = false;
-            _rbody.velocity = Vector2.up * _playerData.jumpPower;
+            _rbody.velocity = Vector2.up * _playerData.data.jumpPower;
             _animator.SetTrigger(_doubleJumpHash);
         }
     }
@@ -231,7 +230,7 @@ public class Player : MonoBehaviour, IDamageable
         {
             if(obj.TryGetComponent(out IDamageable hit))
             {
-                hit.Damage(transform.position, _playerData.AttackPower);
+                hit.Damage(transform.position, _playerData.data.AttackPower);
             }
         }
     }
@@ -254,7 +253,7 @@ public class Player : MonoBehaviour, IDamageable
     private void HandleGravity()
     {
         if (_jumping && _rbody.velocity.y < 0f) //Jump Fall
-            _rbody.gravityScale = _initialGravityScale * _playerData.jumpFallGravityMultiplier;
+            _rbody.gravityScale = _initialGravityScale * _playerData.data.jumpFallGravityMultiplier;
     }
 
     private IEnumerator EnableGroundCheckAfterJump()
@@ -314,7 +313,7 @@ public class Player : MonoBehaviour, IDamageable
 
     private void CollectGem()
     {
-        _playerData.diamonds++;
+        _playerData.data.diamonds++;
     }
 
     private void OnDisable()
@@ -329,64 +328,72 @@ public class Player : MonoBehaviour, IDamageable
             return;
 
         Health -= damage;
-        _playerData.health = Health < 0f ? 0f : Health;
+        _playerData.data.health = Health < 0f ? 0f : Health;
         OnPlayerDamaged.Raise();
 
         if (transform.position.x > attackPos.x)
-            _rbody.AddForce((Vector2.right + Vector2.up) * _playerData.knockbackForce, ForceMode2D.Impulse);
+            _rbody.AddForce((Vector2.right + Vector2.up) * _playerData.data.knockbackForce, ForceMode2D.Impulse);
         else
-            _rbody.AddForce((Vector2.left + Vector2.up) * _playerData.knockbackForce, ForceMode2D.Impulse);
+            _rbody.AddForce((Vector2.left + Vector2.up) * _playerData.data.knockbackForce, ForceMode2D.Impulse);
 
         if (Health <= 0f)
         {
+            SavePlayer();
             _animator.SetTrigger(_deathAnimHash);
+
+
+
+
             _effects.DisplaySpawnEffect();
 
-            OnPlayerDeath.Raise();
 
-            //dead is true
-            //Destroy(gameObject, 2f);
+
+
+            OnPlayerDeath.Raise();
+            HandleControls(false);
+            _rbody.sharedMaterial = _nonSlippery;
         }
         else
             _animator.SetTrigger(_hitAnimHash);
     }
 
-    public void EnableMovement()
-    {
-        _cantMove = false;
-    }
-
-    public void DisableMovement()
-    {
-        _cantMove = true;
-    }
-
     public void UpgradeAttackPower()
     {
-        _playerData.gotAttackUpgrade = true;
-        _animator.runtimeAnimatorController = _playerData.fireOverride;
+        _playerData.data.gotAttackUpgrade = true;
+        _animator.runtimeAnimatorController = _fireOverride;
     }
 
     public void UpgradeSpeed()
     {
-        _playerData.gotWindBoots = true;
+        _playerData.data.gotWindBoots = true;
     }
 
     public void GetCastleKey()
     {
-        _playerData.gotCastleKey = true;
+        _playerData.data.gotCastleKey = true;
     }
 
     private void SavePlayer()
     {
-        SaveManager.SavePlayerData(_playerData);
+        SaveManager.SavePlayerData(_playerData.data);
     }
 
     private void LoadPlayer()
     {
-        PlayerData load = SaveManager.LoadPlayerData();
+        Data load = SaveManager.LoadPlayerData();
         if (!(load is null))
-            _playerData = load;
+            _playerData.data = load;
+    }
+
+    private void OnApplicationQuit()
+    {
+        SavePlayer();
+    }
+
+    private void OnApplicationPause(bool pause)
+    {
+        if(pause)
+            SavePlayer();
     }
 
     public void HandleControls(bool enable)

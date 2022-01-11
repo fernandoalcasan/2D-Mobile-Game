@@ -40,7 +40,6 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        UpdateHealth();
         UpdateDiamonds();
         Diamond.OnDiamondCollected += UpdateDiamonds;
 
@@ -57,12 +56,12 @@ public class UIManager : MonoBehaviour
 
     public void UpdateDiamonds()
     {
-        _diamondsText.text = _playerData.diamonds.ToString();
+        _diamondsText.text = _playerData.data.diamonds.ToString();
     }
 
     public void UpdateHealth()
     {
-        float currentHealth = _playerData.health / _playerData.maxHealth;
+        float currentHealth = _playerData.data.health / _playerData.data.maxHealth;
         _healthImage.fillAmount = currentHealth;
     }
 

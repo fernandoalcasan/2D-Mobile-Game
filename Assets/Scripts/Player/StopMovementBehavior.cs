@@ -12,7 +12,7 @@ public class StopMovementBehavior : StateMachineBehaviour
         if (_player is null)
             _player = animator.GetComponent<Player>();
 
-        _player.DisableMovement();
+        _player.HandleControls(false);
     }
 
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
@@ -21,6 +21,6 @@ public class StopMovementBehavior : StateMachineBehaviour
         if (_player is null)
             Debug.LogError("Player is NULL!");
 
-        _player.EnableMovement();
+        _player.HandleControls(true);
     }
 }

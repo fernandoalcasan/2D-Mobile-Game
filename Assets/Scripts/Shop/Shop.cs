@@ -11,12 +11,16 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
     [SerializeField]
     private Canvas _shopWorldCanvas;
     private CanvasScaler _shopWorldCanvasScaler;
+    
+    [Header("Shop elements")]
     [SerializeField]
     private Text _textDialog;
     [SerializeField]
     private Image _itemImg;
     [SerializeField]
     private Text _gemsCount;
+    [SerializeField]
+    private Button[] _itemBtns;
 
     [Header("Ads properties")]
     [SerializeField]
@@ -70,6 +74,11 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
             Debug.LogError("The shop world canvas scaler is NULL");
     }
 
+    private void Start()
+    {
+        UpdateData();
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if(other.CompareTag("Player"))
@@ -86,6 +95,16 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
             _shopWorldCanvas.enabled = false;
             _shopWorldCanvasScaler.enabled = false;
         }
+    }
+
+    private void UpdateData()
+    {
+        if (_playerData.data.gotAttackUpgrade)
+            _itemBtns[0].interactable = false;
+        if (_playerData.data.gotWindBoots)
+            _itemBtns[1].interactable = false;
+        if (_playerData.data.gotCastleKey)
+            _itemBtns[2].interactable = false;
     }
 
     public void DisplayOrHideShop(bool enable)
@@ -122,9 +141,9 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
             return;
         }
 
-        if (_playerData.diamonds >= _itemSelected.cost)
+        if (_playerData.data.diamonds >= _itemSelected.cost)
         {
-            _playerData.diamonds -= _itemSelected.cost;
+            _playerData.data.diamonds -= _itemSelected.cost;
             _itemSelected.OnItemBought.Raise();
             _btnSelected.interactable = false;
             _textDialog.text = _itemSelected.buyPhrase;
@@ -143,7 +162,7 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
 
     private void UpdateGems()
     {
-        _gemsCount.text = _playerData.diamonds.ToString();
+        _gemsCount.text = _playerData.data.diamonds.ToString();
         UIManager.Instance.UpdateDiamonds();
     }
 
@@ -219,7 +238,7 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
             AudioManager.Instance.PlayOneShotSFX(_successSound, 1f);
             AudioManager.Instance.PlayOneShotSFX(_gemsSound, 1f);
 
-            _playerData.diamonds += _diamondsPerAd;
+            _playerData.data.diamonds += _diamondsPerAd;
             UpdateGems();
 
             LoadAd();

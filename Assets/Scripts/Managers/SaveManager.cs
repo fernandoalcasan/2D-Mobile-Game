@@ -4,7 +4,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 public static class SaveManager
 {
-    public static void SavePlayerData(PlayerData playerData)
+    public static void SavePlayerData(Data playerData)
     {
         BinaryFormatter binaryFormatter = new BinaryFormatter();
         string path = Application.persistentDataPath + "/data.pak";
@@ -14,7 +14,7 @@ public static class SaveManager
         }
     }
 
-    public static PlayerData LoadPlayerData()
+    public static Data LoadPlayerData()
     {
         string path = Application.persistentDataPath + "/data.pak";
 
@@ -23,7 +23,7 @@ public static class SaveManager
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             using (FileStream stream = new FileStream(path, FileMode.Open))
             {
-                PlayerData playerData = binaryFormatter.Deserialize(stream) as PlayerData;
+                Data playerData = binaryFormatter.Deserialize(stream) as Data;
                 return playerData;
             }
         }
