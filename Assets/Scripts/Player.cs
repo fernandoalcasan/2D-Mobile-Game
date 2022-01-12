@@ -399,9 +399,15 @@ public class Player : MonoBehaviour, IDamageable
     public void HandleControls(bool enable)
     {
         if(enable)
+        {
             _playerActions.Player_Map.Enable();
+            _rbody.sharedMaterial = _slippery;
+        }
         else
+        {
             _playerActions.Player_Map.Disable();
+            _rbody.sharedMaterial = _nonSlippery;
+        }
     }
 
     private void PlaySFX(SFX sfx)

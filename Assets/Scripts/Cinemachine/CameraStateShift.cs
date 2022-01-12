@@ -11,6 +11,7 @@ public class CameraStateShift : MonoBehaviour
     [SerializeField]
     private string _nextCameraState;
 
+    //To set the camera shift dependant on gameobjects (enemies) that will disappear
     [SerializeField]
     private bool _isDependant;
 
@@ -24,6 +25,16 @@ public class CameraStateShift : MonoBehaviour
     [SerializeField]
     private float _checkForObjsEvery;
 
+    [SerializeField]
+    private bool _stopsPlayer;
+
+    [Header("Game Event to Stop Player")]
+    [SerializeField]
+    private GameEvent _stopPlayerEvent;
+    [SerializeField]
+    private GameEvent _restorePlayerEvent;
+
+    //Help vars
     private int _NCSHash;
     private int _FCSHash;
     private BoxCollider2D _collider;
@@ -57,6 +68,9 @@ public class CameraStateShift : MonoBehaviour
                 
                 StartCoroutine(CheckObjectives());
             }
+
+            if (_stopsPlayer)
+                _stopPlayerEvent.Raise();
         }
     }
 
@@ -80,6 +94,9 @@ public class CameraStateShift : MonoBehaviour
     {
         if (!(OnCameraShift is null))
             OnCameraShift(_FCSHash);
+
+        if(_stopsPlayer)
+            _restorePlayerEvent.Raise();
 
         if (_bounds)
             _bounds.SetActive(false);
