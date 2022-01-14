@@ -25,7 +25,9 @@ public class Acid : MonoBehaviour, IDamageable
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.TryGetComponent(out IDamageable hit))
+        if(other.CompareTag("Ground"))
+            Destroy(gameObject);
+        else if (other.TryGetComponent(out IDamageable hit))
         {
             hit.Damage(transform.position, _attackPower);
             Destroy(gameObject);
@@ -34,8 +36,6 @@ public class Acid : MonoBehaviour, IDamageable
 
     public void Damage(Vector2 attackPos, float damage)
     {
-        //Play acid destruction audio
-
         Destroy(gameObject);
     }
 }

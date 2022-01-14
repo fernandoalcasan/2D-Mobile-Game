@@ -20,8 +20,6 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     [SerializeField]
     private float attackDistance;
     [SerializeField]
-    protected float attackRange;
-    [SerializeField]
     private float _knockbackForce;
     [SerializeField]
     private float _huntingSpeed;

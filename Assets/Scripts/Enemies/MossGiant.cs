@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MossGiant : Enemy, IDamageable
+public class MossGiant : Enemy
 {
     
 }

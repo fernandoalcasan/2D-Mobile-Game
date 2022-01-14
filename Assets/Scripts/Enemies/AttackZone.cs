@@ -45,5 +45,13 @@ public class AttackZone : MonoBehaviour
             if (_enemiesInZone.Count == 0)
                 Destroy(gameObject);
         }
+        //To avoid enemies getting out of the attack zone
+        else if(other.CompareTag("Enemy"))
+        {
+            if(other.TryGetComponent(out IDamageable damageable))
+            {
+                damageable.Damage(other.transform.position, 10f);
+            }
+        }
     }
 }
