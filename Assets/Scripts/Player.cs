@@ -84,8 +84,6 @@ public class Player : MonoBehaviour, IDamageable
     
     void Awake()
     {
-        LoadPlayer();
-
         _playerActions = new PlayerActions();
 
         _rbody = GetComponent<Rigidbody2D>();
@@ -103,6 +101,8 @@ public class Player : MonoBehaviour, IDamageable
         _effects = GetComponentInChildren<PlayerEffects>();
         if (_effects is null)
             Debug.LogError("PlayerEffects in children is NULL!");
+
+        LoadPlayer();
 
         Health = _playerData.data.maxHealth;
         _initialGravityScale = _rbody.gravityScale;
@@ -125,6 +125,11 @@ public class Player : MonoBehaviour, IDamageable
         _playerActions.Player_Map.Jump.performed += Jump_performed;
         _playerActions.Player_Map.Attack.performed += Attack_performed;
         Diamond.OnDiamondCollected += CollectGem;
+    }
+
+    private void Start()
+    {
+        CheckForUpgrades();
     }
 
     private void OnEnable()
@@ -338,17 +343,8 @@ public class Player : MonoBehaviour, IDamageable
 
         if (Health <= 0f)
         {
-            SavePlayer();
+            SavePlayerData();
             _animator.SetTrigger(_deathAnimHash);
-
-
-
-
-            _effects.DisplaySpawnEffect();
-
-
-
-
             OnPlayerDeath.Raise();
             HandleControls(false);
             _rbody.sharedMaterial = _nonSlippery;
@@ -373,7 +369,7 @@ public class Player : MonoBehaviour, IDamageable
         _playerData.data.gotCastleKey = true;
     }
 
-    private void SavePlayer()
+    public void SavePlayerData()
     {
         SaveManager.SavePlayerData(_playerData.data);
     }
@@ -382,18 +378,18 @@ public class Player : MonoBehaviour, IDamageable
     {
         Data load = SaveManager.LoadPlayerData();
         if (!(load is null))
+        {
             _playerData.data = load;
+        }
     }
 
-    private void OnApplicationQuit()
+    private void CheckForUpgrades()
     {
-        SavePlayer();
-    }
-
-    private void OnApplicationPause(bool pause)
-    {
-        if(pause)
-            SavePlayer();
+        if (_playerData.data.gotAttackUpgrade)
+        {
+            _animator.runtimeAnimatorController = _fireOverride;
+            _effects.UpgradeEffects();
+        }
     }
 
     public void HandleControls(bool enable)

@@ -58,6 +58,10 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
     private void Awake()
     {
 
+#if !UNITY_EDITOR
+        Debug.unityLogger.logEnabled = false;
+#endif
+
         InitializeAdsSDK();
 
         if (_shopCanvas is null || _shopWorldCanvas is null)
@@ -188,11 +192,6 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
         Advertisement.Load(_rewardedVideoID, this);
     }
 
-
-
-
-
-
     public void OnUnityAdsAdLoaded(string placementId)
     {
         Debug.Log("Unity Ad loaded correctly");
@@ -208,17 +207,11 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
         Debug.Log("Unity Ad failed to load.  " + error + ": " + message);
     }
 
-
-
-
-
     public void ShowAd()
     {
         _rewardBtn.interactable = false;
         Advertisement.Show(_rewardedVideoID, this);
     }
-
-
 
     public void OnUnityAdsShowFailure(string placementId, UnityAdsShowError error, string message)
     {

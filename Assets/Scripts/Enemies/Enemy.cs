@@ -84,7 +84,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         if (_onIdle)
             return;
 
-        if(Vector2.Distance(_rb.position, _currentTarget) <= .25f)
+        if(Vector2.SqrMagnitude(_currentTarget - transform.position) <= .05f)
         {
             //Idle when enemy arrives to a waypoint
             _onIdle = true;
@@ -113,7 +113,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
             (_facing.y == 180f && _player.position.x > transform.position.x))
             RotateTowardsTarget(_player.position.x);
 
-        if (Vector2.Distance(_player.position, transform.position) <= attackDistance)
+        if (Vector2.SqrMagnitude(_player.position - transform.position) <= attackDistance * attackDistance)
         {
             PerformAttack(_player.position);
             return;

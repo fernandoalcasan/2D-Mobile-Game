@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -8,6 +7,8 @@ public class UIManager : MonoBehaviour
 {
     [SerializeField]
     private PlayerData _playerData;
+    [SerializeField]
+    private GameEvent _OnAppQuitOrPause;
 
     [SerializeField]
     private Text _diamondsText;
@@ -71,6 +72,7 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 0f;
         _pauseCanvas.enabled = true;
         _pauseCanvasScaler.enabled = true;
+        _OnAppQuitOrPause.Raise();
     }
 
     public void ResumeGame()
@@ -82,7 +84,7 @@ public class UIManager : MonoBehaviour
     }
 
     public void RestartGame()
-    { 
+    {
         StartCoroutine(LoadAsync(1));
     }
 
@@ -102,5 +104,16 @@ public class UIManager : MonoBehaviour
     public void RateGame()
     {
         Application.OpenURL("market://details?id=" + Application.identifier);
+    }
+
+    private void OnApplicationQuit()
+    {
+        _OnAppQuitOrPause.Raise();
+    }
+
+    private void OnApplicationPause(bool pause)
+    {
+        if (pause)
+            _OnAppQuitOrPause.Raise();
     }
 }

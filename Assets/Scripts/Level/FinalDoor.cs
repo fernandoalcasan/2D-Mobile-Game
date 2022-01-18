@@ -84,6 +84,7 @@ public class FinalDoor : MonoBehaviour
 
     private IEnumerator DisplayGameOver()
     {
+        SaveManager.SavePlayerData(_playerData.data);
         yield return new WaitForSeconds(_waitToDisplayGameOver);
         _gameOverCanvas.enabled = true;
         _goCanvasScaler.enabled = true;
