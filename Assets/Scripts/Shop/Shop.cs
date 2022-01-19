@@ -61,8 +61,11 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
 #if !UNITY_EDITOR
         Debug.unityLogger.logEnabled = false;
 #endif
-
-        InitializeAdsSDK();
+        
+        if(Advertisement.isInitialized)
+            _rewardBtn.interactable = true;
+        else
+            InitializeAdsSDK();
 
         if (_shopCanvas is null || _shopWorldCanvas is null)
             Debug.LogError("Please assign the shop Canvas and/or the world canvas");
