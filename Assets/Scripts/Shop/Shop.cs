@@ -26,7 +26,7 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
     [SerializeField]
     private string _androidGameID;
     [SerializeField]
-    private bool _testMode = true;
+    private bool _testMode;
     [SerializeField]
     private bool _enablePerPlacementMode = true;
     [SerializeField]
