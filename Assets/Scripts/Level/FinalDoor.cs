@@ -15,9 +15,9 @@ public class FinalDoor : MonoBehaviour
     [SerializeField]
     private Canvas _doorCanvas;
     private CanvasScaler _doorCanvasScaler;
+
     [SerializeField]
-    private Canvas _gameOverCanvas;
-    private CanvasScaler _goCanvasScaler;
+    private GameEvent _OnGameOver;
 
     [SerializeField]
     private AudioClip _succeedSound;
@@ -36,11 +36,6 @@ public class FinalDoor : MonoBehaviour
             _doorCanvasScaler = _doorCanvas.GetComponent<CanvasScaler>();
         else
             Debug.Log("Please reference the door world canvas");
-
-        if (!(_gameOverCanvas is null))
-            _goCanvasScaler = _gameOverCanvas.GetComponent<CanvasScaler>();
-        else
-            Debug.Log("Please reference the game over canvas");
 
         _anim = GetComponent<Animator>();
     }
@@ -86,7 +81,6 @@ public class FinalDoor : MonoBehaviour
     {
         SaveManager.SavePlayerData(_playerData.data);
         yield return new WaitForSeconds(_waitToDisplayGameOver);
-        _gameOverCanvas.enabled = true;
-        _goCanvasScaler.enabled = true;
+        _OnGameOver.Raise();
     }
 }

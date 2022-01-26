@@ -9,15 +9,13 @@ public class UIManager : MonoBehaviour
     private PlayerData _playerData;
     [SerializeField]
     private GameEvent _OnAppQuitOrPause;
+    [SerializeField]
+    private GameEvent _OnAppResume;
 
     [SerializeField]
     private Text _diamondsText;
     [SerializeField]
     private Image _healthImage;
-
-    [SerializeField]
-    private Canvas _pauseCanvas;
-    private CanvasScaler _pauseCanvasScaler;
 
     [SerializeField]
     private float _waitToLoadScene;
@@ -43,11 +41,6 @@ public class UIManager : MonoBehaviour
     {
         UpdateDiamonds();
         Diamond.OnDiamondCollected += UpdateDiamonds;
-
-        if (!(_pauseCanvas is null))
-            _pauseCanvasScaler = _pauseCanvas.GetComponent<CanvasScaler>();
-        else
-            Debug.Log("Please reference the pause canvas");
     }
 
     private void OnDisable()
@@ -70,8 +63,6 @@ public class UIManager : MonoBehaviour
     {
         AudioListener.pause = true;
         Time.timeScale = 0f;
-        _pauseCanvas.enabled = true;
-        _pauseCanvasScaler.enabled = true;
         _OnAppQuitOrPause.Raise();
     }
 
@@ -79,8 +70,7 @@ public class UIManager : MonoBehaviour
     {
         AudioListener.pause = false;
         Time.timeScale = 1f;
-        _pauseCanvas.enabled = false;
-        _pauseCanvasScaler.enabled = false;
+        _OnAppResume.Raise();
     }
 
     public void RestartGame()
@@ -114,6 +104,6 @@ public class UIManager : MonoBehaviour
     private void OnApplicationPause(bool pause)
     {
         if (pause)
-            _OnAppQuitOrPause.Raise();
+            PauseGame();
     }
 }
