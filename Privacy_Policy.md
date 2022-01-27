@@ -10,6 +10,6 @@ The stored data purpose is to assure a good gameplay and it isn't related to the
 
 If you need to submit any inquiry please make sure to send a mail to [elfastidiostudios@gmail.com](mailto:elfastidiostudios@gmail.com) and I'll gladly answer them.
 
-Best regards,
-Fernando Alcantara Santana
+Best regards,  
+Fernando Alcantara Santana  
 [elfastidiostudios@gmail.com](mailto:elfastidiostudios@gmail.com)
