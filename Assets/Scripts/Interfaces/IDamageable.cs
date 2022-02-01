@@ -1,5 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+/*
+ * This script contains the IDamageable interface, which
+ * implements the health and damage system of the game
+ */
+
 using UnityEngine;
 
 public interface IDamageable

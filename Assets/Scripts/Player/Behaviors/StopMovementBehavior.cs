@@ -1,5 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
+/*
+ * This script handles the player controls when entering and exiting an animation state.
+ */
+
 using UnityEngine;
 
 public class StopMovementBehavior : StateMachineBehaviour

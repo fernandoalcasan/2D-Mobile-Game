@@ -1,5 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
+/*
+ * This script contains the behavior of areas that deal damage to 
+ * damageable gameobjects (IDamageable interface) 
+ * Some examples of this areas are the spikes and the water below the bridge
+ */
+
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]

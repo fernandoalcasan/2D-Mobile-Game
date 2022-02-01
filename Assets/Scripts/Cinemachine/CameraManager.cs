@@ -1,5 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
+/*
+ * This script makes sure to subscribe to the Camera shift event in order to 
+ * control the Cinemachine state driven camera that's being used in the game. 
+ */
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]

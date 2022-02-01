@@ -1,3 +1,7 @@
+/*
+ * This script contains the UI Manager functionality using the Singleton pattern.
+ */
+
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -5,6 +9,8 @@ using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
+    //Game events to raise (Unite 2017 Event bus pattern)
+    [Header("Game Events")]
     [SerializeField]
     private PlayerData _playerData;
     [SerializeField]
@@ -12,11 +18,13 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private GameEvent _OnAppResume;
 
+    [Header("UI elements")]
     [SerializeField]
     private Text _diamondsText;
     [SerializeField]
     private Image _healthImage;
 
+    [Header("Scene Load Settings")]
     [SerializeField]
     private float _waitToLoadScene;
 

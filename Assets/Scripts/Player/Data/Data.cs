@@ -1,5 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
+/*
+ * This script contains the player's data architecture to be saved and used in game.
+ */
+
 using UnityEngine;
 
 [System.Serializable]

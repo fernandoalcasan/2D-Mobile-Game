@@ -1,3 +1,7 @@
+/*
+ * This script makes sure to handle the Main Menu scene mechanics.
+ */
+
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;

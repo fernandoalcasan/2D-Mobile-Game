@@ -1,3 +1,9 @@
+/*
+ * This script contains the general enemy behavior
+ * It implements the IDamageable interface (health system) and
+ * it controls the enemy through a rigidbody component
+ */
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,17 +12,12 @@ using UnityEngine;
 public abstract class Enemy : MonoBehaviour, IDamageable
 {
     public float Health { get; set; }
+
+    [Header("Enemy stats")]
     [SerializeField]
     protected float health;
     [SerializeField]
     protected float speed;
-    [SerializeField]
-    protected float gems;
-    [SerializeField]
-    private GameObject _gemPrefab;
-    [SerializeField]
-    private GameObject _disappearPrefab;
-
     [SerializeField]
     private float attackDistance;
     [SerializeField]
@@ -24,14 +25,24 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     [SerializeField]
     private float _huntingSpeed;
 
+    [Header("Enemy Rewards")]
+    [SerializeField]
+    protected float gems;
+    [SerializeField]
+    private GameObject _gemPrefab;
+    
+    [Header("Enemy Behavior")]
+    [SerializeField]
+    private GameObject _disappearPrefab;
     [SerializeField]
     private List<Transform> _waypoints;
+
+    //Help variables, to cache references and behavior
     protected Animator _anim;
     protected Transform _player;
     protected Rigidbody2D _rb;
     protected Collider2D _collider;
     protected AudioSource _sfx;
-
     private Vector3 _currentTarget;
     private int _targetIndex;
     private int _idleAnimHash;
@@ -71,6 +82,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         RotateTowardsTarget(_currentTarget.x);
     }
 
+    //Enemy behavior when hunting or not
     private void FixedUpdate()
     {
         if (!_hunting)
@@ -79,6 +91,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
             HuntPlayer();
     }
 
+    //Enemy moves following the waypoints provided in editor
     private void MoveToWaypoint()
     {
         if (_onIdle)
@@ -103,6 +116,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         _rb.MovePosition(Vector2.MoveTowards(transform.position, _currentTarget, speed * Time.fixedDeltaTime));
     }
 
+    //Enemy moves right or left to follow player and attacks at selected distance
     private void HuntPlayer()
     {
         if (_attacking || _gotHit)
@@ -124,6 +138,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         _rb.velocity = newVel2Move;
     }
     
+    //Enemy rotates towards the player when it's on range
     private void RotateTowardsTarget(float targetXPos)
     {
         _facing = transform.eulerAngles;
@@ -143,6 +158,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         RotateTowardsTarget(_currentTarget.x);
     }
 
+    //Enemy receives player info when player enters the attack area
     public void IdentifyPlayer(Transform player)
     {
         if (_player is null)
@@ -153,6 +169,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         _onIdle = false;
     }
 
+    //Enemy goes back to follow the waypoints when player leaves attack area
     public void ReturnToPatrol()
     {
         _hunting = false;
@@ -167,18 +184,20 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         _attacking = false;
     }
 
-    //Method called after the githit state ends
+    //Method called after the gethit state ends
     public void StopHitFeedback()
     {
         _gotHit = false;
     }
 
+    //Virtual method to change the enemy behavior to attack
     protected virtual void PerformAttack(Vector2 finalPos)
     {
         _anim.SetTrigger(_attackAnimHash);
         _attacking = true;
     }
 
+    //Virtual method to handle the enemy damage while implementing the IDamageable interface
     public virtual void Damage(Vector2 attackPos, float damage)
     {
         if (_isDead)
@@ -207,6 +226,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
             _anim.SetTrigger(_hitAnimHash);
     }
 
+    //Coroutine to instantiate a detah effect when enemy gets defeated
     private IEnumerator DisplayDeathEffect()
     {
         yield return new WaitForSeconds(0.5f);
@@ -216,6 +236,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         Destroy(deathEffect, 2f);
     }
 
+    //Method called from animation events to play SFX by using an scriptable object as parameter
     protected void PlaySFX(SFX sfx)
     {
         _sfx.PlayOneShot(sfx.sound, sfx.volume);

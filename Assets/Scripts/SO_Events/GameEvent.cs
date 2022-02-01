@@ -1,6 +1,8 @@
-// ----------------------------------------------------------------------------
-// Game Architecture with Scriptable Objects taken from Ryan Hipple's talk at Unite 2017
-// ----------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
+* Game Architecture with Scriptable Objects taken from Ryan Hipple's talk at Unite 2017
+* This script helps to implement the Event bus pattern as events in scriptable objects
+* ----------------------------------------------------------------------------
+*/
 
 using System.Collections.Generic;
 using UnityEngine;

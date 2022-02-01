@@ -1,14 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
+/*
+ * This script makes sure to handle the FX from the player mechanics.
+ */
+
 using UnityEngine;
 
 public class PlayerEffects : MonoBehaviour
 {
+    //Help variables, to cache the animator references
     private int _attackArcHash;
     private int _spawnLightHash;
-
     private Animator _animator;
 
+    [Header("FX References")]
     [SerializeField]
     private SpriteRenderer _arcSprite;
     [SerializeField]

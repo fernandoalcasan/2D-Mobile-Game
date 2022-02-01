@@ -1,3 +1,8 @@
+/*
+ * This script contains the behavior of the shop of the game.
+ * It also handles the Unity ads and the respective UI mechanics.
+ */
+
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Advertisements;
@@ -5,6 +10,7 @@ using UnityEngine.Advertisements;
 [RequireComponent(typeof(Collider2D))]
 public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoadListener, IUnityAdsShowListener
 {
+    [Header("UI assets")]
     [SerializeField]
     private Canvas _shopCanvas;
     private CanvasScaler _shopCanvasScaler;
@@ -36,12 +42,17 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
     [SerializeField]
     private int _diamondsPerAd;
 
+    [Header("Player Data")]
     [SerializeField]
     private PlayerData _playerData;
+
+    [Header("Shop Events")]
     [SerializeField]
     private GameEvent _OnShopDisplayed;
     [SerializeField]
     private GameEvent _OnShopHidden;
+
+    //Help variables, to cache references and behavior
     private Item _itemSelected;
     private Button _btnSelected;
 
@@ -86,6 +97,7 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
         UpdateData();
     }
 
+    //Enable world UI of the shop
     private void OnTriggerEnter2D(Collider2D other)
     {
         if(other.CompareTag("Player"))
@@ -95,6 +107,7 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
         }
     }
 
+    //Disable world UI of the shop
     private void OnTriggerExit2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
@@ -104,6 +117,7 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
         }
     }
 
+    //Update items that were acquired already
     private void UpdateData()
     {
         if (_playerData.data.gotAttackUpgrade)
@@ -114,6 +128,7 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
             _itemBtns[2].interactable = false;
     }
 
+    //Enable/Disable UI of the shop and raise its events
     public void DisplayOrHideShop(bool enable)
     {
         if (enable)
@@ -127,6 +142,7 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
         _textDialog.text = "Greetings strange traveler... Hoy may I be of service?";
     }
 
+    //Method called by UI buttons of the shop
     public void OnItemSelected(Item item)
     {
         _itemSelected = item;
@@ -134,11 +150,13 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
         _itemImg.sprite = item.image;
     }
 
+    //Method called by UI buttons of the shop
     public void UpdateSelection(Button but)
     {
         _btnSelected = but;
     }
 
+    //Method called by UI button of the shop
     public void BuyItem()
     {
         if(_itemSelected is null || _btnSelected is null)
@@ -167,34 +185,40 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
         _btnSelected = null;
     }
 
+    //Method to update respective UI of the shop
     private void UpdateGems()
     {
         _gemsCount.text = _playerData.data.diamonds.ToString();
         UIManager.Instance.UpdateDiamonds();
     }
 
+    //Method to initialize Unity Ads
     private void InitializeAdsSDK()
     {
         Advertisement.Initialize(_androidGameID, _testMode, _enablePerPlacementMode, this);
     }
 
+    //Method called when Unity Ads are initialized (implemented by interface)
     public void OnInitializationComplete()
     {
         Debug.Log("Unity ads initialized");
         LoadAd();
     }
 
+    //Method called when Unity Ads fail to initialize (implemented by interface)
     public void OnInitializationFailed(UnityAdsInitializationError error, string message)
     {
         Debug.Log("Unity ads failed to initialize. " + error + ": " + message);
     }
 
+    //Method called to load a Unity Ad when needed
     private void LoadAd()
     {
         Debug.Log("Loading Ad: " + _rewardedVideoID);
         Advertisement.Load(_rewardedVideoID, this);
     }
 
+    //Method called when the Unity Ad gets loaded (implemented by interface)
     public void OnUnityAdsAdLoaded(string placementId)
     {
         Debug.Log("Unity Ad loaded correctly");
@@ -205,27 +229,33 @@ public class Shop : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoa
         }
     }
 
+    //Method called when the Unity Ad failed to load (implemented by interface)
     public void OnUnityAdsFailedToLoad(string placementId, UnityAdsLoadError error, string message)
     {
         Debug.Log("Unity Ad failed to load.  " + error + ": " + message);
     }
 
+    //Method called to show the respective ad
     public void ShowAd()
     {
         _rewardBtn.interactable = false;
         Advertisement.Show(_rewardedVideoID, this);
     }
 
+    //Method called when Unity Ad failed to show (implemented by interface)
     public void OnUnityAdsShowFailure(string placementId, UnityAdsShowError error, string message)
     {
         Debug.Log("Ad wasn't shown, reward wasn't given. " + error + ": " + message);
         LoadAd();
     }
 
+    //Method called when Unity Ad starts to show (implemented by interface)
     public void OnUnityAdsShowStart(string placementId){}
 
+    //Method called when Unity Ad gets clicked (implemented by interface)
     public void OnUnityAdsShowClick(string placementId){}
 
+    //Method called when Unity Ad was successfully watched (implemented by interface)
     public void OnUnityAdsShowComplete(string placementId, UnityAdsShowCompletionState showCompletionState)
     {
         if (placementId.Equals(_rewardedVideoID) && showCompletionState.Equals(UnityAdsShowCompletionState.COMPLETED))

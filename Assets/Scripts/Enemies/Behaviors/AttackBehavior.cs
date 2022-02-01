@@ -1,5 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+/*
+ * This script makes sure to handle the enemy behavior when
+ * the attack animation state ends
+ */
+
 using UnityEngine;
 
 public class AttackBehavior : StateMachineBehaviour

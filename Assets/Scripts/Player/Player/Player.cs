@@ -1,5 +1,10 @@
+/*
+ * This script contains the player's behavior and mechanics.
+ * It implements the IDamageable interface (health system) and
+ * it controls the player through a rigidbody component
+ */
+
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,6 +12,7 @@ public class Player : MonoBehaviour, IDamageable
 {
     public float Health { get; set; }
 
+    [Header("Player Events")]
     [SerializeField]
     private GameEvent OnPlayerDamaged;
     [SerializeField]
@@ -132,11 +138,13 @@ public class Player : MonoBehaviour, IDamageable
         CheckForUpgrades();
     }
 
+    //Enable the player controls
     private void OnEnable()
     {
         _playerActions.Player_Map.Enable();
     }
 
+    //Handle player's behavior and physics
     void FixedUpdate()
     {
         if (_groundCheckEnabled)
@@ -146,6 +154,7 @@ public class Player : MonoBehaviour, IDamageable
         HandleGravity();
     }
 
+    //Handles player movement depending on ground slopes
     private void HandleMovement()
     {
         if (!_playerActions.Player_Map.enabled)
@@ -168,6 +177,7 @@ public class Player : MonoBehaviour, IDamageable
         }
     }
 
+    //Handles movement action input (new input system)
     private void OnMovementInput(InputAction.CallbackContext context)
     {
         if (context.canceled && _isOnSlope)
@@ -190,6 +200,7 @@ public class Player : MonoBehaviour, IDamageable
         _animator.SetFloat(_moveAnimHash, Mathf.Abs(_moveInput));
     }
 
+    //Handles jump action input (new input system)
     private void Jump_performed(InputAction.CallbackContext context)
     {
         if (_isGrounded)
@@ -207,7 +218,8 @@ public class Player : MonoBehaviour, IDamageable
             _animator.SetTrigger(_doubleJumpHash);
         }
     }
-    
+
+    //Handles attack action input (new input system)
     private void Attack_performed(InputAction.CallbackContext context)
     {
         if(_canAttack && _isGrounded && Health > 0f)
@@ -218,6 +230,7 @@ public class Player : MonoBehaviour, IDamageable
         }
     }
 
+    //Handles attack cooldown to avoid spamming attacks
     private IEnumerator StartAttackCoolDown()
     {
         _canAttack = false;
@@ -225,7 +238,7 @@ public class Player : MonoBehaviour, IDamageable
         _canAttack = true;
     }
 
-    //Method called from attack animation
+    //Method called from an attack animation event to perform damage to IDamageable components in attack range
     private void Attack()
     {
         _rbody.velocity = Vector2.zero;
@@ -240,6 +253,7 @@ public class Player : MonoBehaviour, IDamageable
         }
     }
 
+    //Remove to draw the attack range or the ground check range while in Editor mode
     /*private void OnDrawGizmos()
     {
         if (_attackPoint is null)
@@ -255,12 +269,14 @@ public class Player : MonoBehaviour, IDamageable
         Gizmos.DrawWireSphere(_groundCheckPoint.position, _groundCheckHeight);
     }*/
 
+    //Changes gravity when falling from a jump to perform a better jump
     private void HandleGravity()
     {
         if (_jumping && _rbody.velocity.y < 0f) //Jump Fall
             _rbody.gravityScale = _initialGravityScale * _playerData.data.jumpFallGravityMultiplier;
     }
 
+    //Coroutine to disable and enable again the ground check after every jump (to avoid issues with one-way platforms)
     private IEnumerator EnableGroundCheckAfterJump()
     {
         _groundCheckEnabled = false;
@@ -269,6 +285,7 @@ public class Player : MonoBehaviour, IDamageable
         _groundCheckEnabled = true;
     }
 
+    //Method to check if the player is in a slope or not
     private void SlopeCheck()
     {
         //Slope check from feet origin
@@ -288,6 +305,7 @@ public class Player : MonoBehaviour, IDamageable
         }
     }
 
+    //Method to check if the player is grounded
     private void GroundCheck()
     {
         var groundCast = Physics2D.OverlapBox(_groundCheckPoint.position, _boxSize, 0f, _groundMask);
@@ -316,6 +334,7 @@ public class Player : MonoBehaviour, IDamageable
         //If player is jumping and going up _isGrounded remains without change
     }
 
+    //Method subscribed to the diamond collection event in order to update diamonds data for the player
     private void CollectGem()
     {
         _playerData.data.diamonds++;
@@ -327,6 +346,7 @@ public class Player : MonoBehaviour, IDamageable
         Diamond.OnDiamondCollected -= CollectGem;
     }
 
+    //Method implemented by the IDamageable interface to handle the health and damage system
     public void Damage(Vector2 attackPos, float damage)
     {
         if (Health <= 0f)
@@ -353,27 +373,32 @@ public class Player : MonoBehaviour, IDamageable
             _animator.SetTrigger(_hitAnimHash);
     }
 
+    //Method called when certain item is acquired
     public void UpgradeAttackPower()
     {
         _playerData.data.gotAttackUpgrade = true;
         _animator.runtimeAnimatorController = _fireOverride;
     }
 
+    //Method called when certain item is acquired
     public void UpgradeSpeed()
     {
         _playerData.data.gotWindBoots = true;
     }
 
+    //Method called when certain item is acquired
     public void GetCastleKey()
     {
         _playerData.data.gotCastleKey = true;
     }
 
+    //Method called to save the player's data locally
     public void SavePlayerData()
     {
         SaveManager.SavePlayerData(_playerData.data);
     }
 
+    //Method called to load the player's local data
     private void LoadPlayer()
     {
         Data load = SaveManager.LoadPlayerData();
@@ -383,6 +408,7 @@ public class Player : MonoBehaviour, IDamageable
         }
     }
 
+    //Method called at start to make sure that upgrades are implemented
     private void CheckForUpgrades()
     {
         if (_playerData.data.gotAttackUpgrade)
@@ -392,6 +418,7 @@ public class Player : MonoBehaviour, IDamageable
         }
     }
 
+    //Method to enable or disable the player controls
     public void HandleControls(bool enable)
     {
         if(enable)
@@ -406,11 +433,14 @@ public class Player : MonoBehaviour, IDamageable
         }
     }
 
+    //Method called by animation events to play SFX with scriptable objects
     private void PlaySFX(SFX sfx)
     {
         AudioManager.Instance.PlayOneShotSFX(sfx.sound, sfx.volume);
     }
 
+    //Method called by the walking animation to play the footstep SFX
+    //with scriptable objects when the player is grounded
     private void PlayFootstep(SFX footstep)
     {
         if(_isGrounded)

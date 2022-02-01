@@ -1,9 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
+/*
+ * This script contains the Audio Manager functionality using the Singleton pattern.
+ */
+
 using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
+    //References to Audio Sources
     [SerializeField]
     private AudioSource _sfx;
     [SerializeField]
@@ -25,6 +28,8 @@ public class AudioManager : MonoBehaviour
     {
         _instance = this;
     }
+
+    //Set the UI audio source to ignore the audio listener pause when game pauses
     private void Start()
     {
         _ui.ignoreListenerPause = true;

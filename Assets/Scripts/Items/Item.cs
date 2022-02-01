@@ -1,5 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
+/*
+ * This script allows to create items for the shop as scriptable objects
+ */
+
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New_Item", menuName = "Item")]

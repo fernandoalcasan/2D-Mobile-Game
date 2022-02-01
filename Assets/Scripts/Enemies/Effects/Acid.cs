@@ -1,5 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+/*
+ * This script contains the behavior of the spider's acid attack
+ * It uses the IDamageable interface to damage and it's also damageable
+ */
+
 using UnityEngine;
 
 public class Acid : MonoBehaviour, IDamageable

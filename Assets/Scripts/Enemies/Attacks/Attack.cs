@@ -1,5 +1,9 @@
+/*
+ * This script makes sure to give a 2D collider the ability to "damage" gameobjects with 
+ * an IDamageable interface (health system) and apply a proper cooldown to avoid double calls
+ */
+
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
@@ -10,6 +14,7 @@ public class Attack : MonoBehaviour
     [SerializeField]
     private float _attackPower;
 
+    //Help variables
     private WaitForSeconds _wait;
     private bool _canDamage = true;
 

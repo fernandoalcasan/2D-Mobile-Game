@@ -1,5 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
+/*
+ * Class meant to override virtual general behavior of the spider enemy in case its necessary
+ */
+
 using UnityEngine;
 
 public class Spider : Enemy
